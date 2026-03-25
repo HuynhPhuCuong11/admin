@@ -44,10 +44,27 @@
             </a>
         </li>
 
+        <li class="menu-label">Khuyến mãi</li>
+        <li th:classappend="${activePage == 'coupons'} ? 'active'">
+            <a th:href="@{/admin/coupons}">
+                <i class="icon">🎫</i><span>Coupon</span>
+            </a>
+        </li>
+        <li th:classappend="${activePage == 'banners'} ? 'active'">
+            <a th:href="@{/admin/banners}">
+                <i class="icon">🖼️</i><span>Banner</span>
+            </a>
+        </li>
+
         <li class="menu-label">Quản lý hệ thống</li>
         <li th:classappend="${activePage == 'users'} ? 'active'">
             <a th:href="@{/admin/users}">
                 <i class="icon">👥</i><span>Người dùng</span>
+            </a>
+        </li>
+        <li th:classappend="${activePage == 'reports'} ? 'active'">
+            <a th:href="@{/admin/reports}">
+                <i class="icon">📈</i><span>Báo cáo</span>
             </a>
         </li>
     </ul>

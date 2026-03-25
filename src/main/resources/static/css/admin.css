@@ -129,6 +129,8 @@ button { cursor: pointer; border: none; background: none; }
 .badge-success { background: var(--success); color: #fff; }
 .badge-warning { background: var(--warning); color: #fff; }
 .badge-info    { background: var(--info); color: #fff; }
+.badge-secondary { background: #6c757d; color: #fff; }
+.text-danger { color: var(--danger); }
 
 .sidebar-footer {
     padding: 16px;

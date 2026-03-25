@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - Admin'">Báo cáo</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content" id="mainContent">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="page-body">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Revenue Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon green">💰</div>
+                    <div class="stat-info">
+                        <div class="stat-value"
+                             th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                        <div class="stat-label">Tổng doanh thu</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">📅</div>
+                    <div class="stat-info">
+                        <div class="stat-value"
+                             th:text="${#numbers.formatDecimal(revenueToday, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                        <div class="stat-label">Doanh thu hôm nay</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">📆</div>
+                    <div class="stat-info">
+                        <div class="stat-value"
+                             th:text="${#numbers.formatDecimal(revenueThisMonth, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                        <div class="stat-label">Doanh thu tháng này</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">🛒</div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${ordersToday}">0</div>
+                        <div class="stat-label">Đơn hàng hôm nay</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Statistics -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📦 Thống kê đơn hàng</span>
+                    </div>
+                    <div class="card-body">
+                        <table class="admin-table">
+                            <tbody>
+                                <tr>
+                                    <td>Tổng đơn hàng</td>
+                                    <td style="text-align:right"><strong th:text="${totalOrders}">0</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Chờ xác nhận</td>
+                                    <td style="text-align:right">
+                                        <span class="badge badge-warning" th:text="${pendingOrders}">0</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Đang xử lý</td>
+                                    <td style="text-align:right">
+                                        <span class="badge badge-info" th:text="${processingOrders}">0</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Đã giao thành công</td>
+                                    <td style="text-align:right">
+                                        <span class="badge badge-success" th:text="${deliveredOrders}">0</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Đã hủy</td>
+                                    <td style="text-align:right">
+                                        <span class="badge badge-danger" th:text="${cancelledOrders}">0</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🏪 Thống kê hệ thống</span>
+                    </div>
+                    <div class="card-body">
+                        <table class="admin-table">
+                            <tbody>
+                                <tr>
+                                    <td>Tổng sản phẩm</td>
+                                    <td style="text-align:right"><strong th:text="${totalProducts}">0</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Sản phẩm đang bán</td>
+                                    <td style="text-align:right">
+                                        <span class="badge badge-success" th:text="${publishedProducts}">0</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Tổng người dùng</td>
+                                    <td style="text-align:right"><strong th:text="${totalUsers}">0</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Khách hàng</td>
+                                    <td style="text-align:right">
+                                        <span class="badge badge-info" th:text="${totalCustomers}">0</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="card" style="margin-top:24px">
+                <div class="card-header">
+                    <span class="card-title">🔗 Liên kết nhanh</span>
+                </div>
+                <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap">
+                    <a th:href="@{/admin/orders}" class="btn btn-outline">📋 Xem danh sách đơn hàng</a>
+                    <a th:href="@{/admin/orders?orderStatus=pending}" class="btn btn-warning">⏳ Đơn chờ xử lý</a>
+                    <a th:href="@{/admin/products}" class="btn btn-outline">🍵 Quản lý sản phẩm</a>
+                    <a th:href="@{/admin/coupons}" class="btn btn-outline">🎫 Quản lý coupon</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
