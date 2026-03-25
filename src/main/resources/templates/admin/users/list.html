@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - Admin'">Người dùng</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content" id="mainContent">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="page-body">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Danh sách người dùng</span>
+                </div>
+
+                <div class="card-body" style="padding-bottom:0">
+                    <div class="filter-bar">
+                        <form method="get" th:action="@{/admin/users}">
+                            <input type="text" name="keyword" class="search-input"
+                                   placeholder="Tìm tên, email..." th:value="${keyword}">
+                            <select name="status" class="filter-select">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="active"   th:selected="${status == 'active'}">Hoạt động</option>
+                                <option value="inactive" th:selected="${status == 'inactive'}">Ngừng hoạt động</option>
+                                <option value="banned"   th:selected="${status == 'banned'}">Đã cấm</option>
+                            </select>
+                            <select name="role" class="filter-select">
+                                <option value="">Tất cả vai trò</option>
+                                <option value="customer" th:selected="${role == 'customer'}">Khách hàng</option>
+                                <option value="admin"    th:selected="${role == 'admin'}">Admin</option>
+                                <option value="staff"    th:selected="${role == 'staff'}">Nhân viên</option>
+                            </select>
+                            <button type="submit" class="btn btn-secondary btn-sm">🔍 Tìm</button>
+                            <a th:href="@{/admin/users}" class="btn btn-outline btn-sm">↺ Reset</a>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Người dùng</th>
+                            <th>SĐT</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="u, stat : ${users.content}">
+                            <td th:text="${users.number * users.size + stat.index + 1}">1</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);
+                                                display:flex;align-items:center;justify-content:center;
+                                                color:#fff;font-size:14px;font-weight:600;flex-shrink:0"
+                                         th:text="${#strings.substring(u.fullName != null ? u.fullName : u.email, 0, 1).toUpperCase()}">A</div>
+                                    <div>
+                                        <div style="font-weight:500" th:text="${u.fullName ?: 'Chưa cập nhật'}">Tên</div>
+                                        <div style="font-size:12px;color:var(--text-muted)" th:text="${u.email}">email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:text="${u.phone ?: '—'}">—</td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="${u.roles == 'admin' ? 'status-processing' : u.roles == 'staff' ? 'status-confirmed' : 'status-active'}"
+                                      th:text="${u.roles == 'admin' ? '👑 Admin' : u.roles == 'staff' ? '🔧 Nhân viên' : '👤 Khách hàng'}">
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="'status-' + ${u.status}"
+                                      th:text="${u.status == 'active' ? 'Hoạt động' : u.status == 'banned' ? 'Đã cấm' : 'Ngừng HĐ'}">
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">—</td>
+                            <td>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                                    <a th:href="@{'/admin/users/edit/' + ${u.id}}"
+                                       class="btn btn-sm btn-warning">✏️ Sửa</a>
+
+                                    <!-- Toggle active/banned -->
+                                    <form th:action="@{'/admin/users/' + ${u.id} + '/status'}" method="post" style="display:inline">
+                                        <input type="hidden" name="status"
+                                               th:value="${u.status == 'active' ? 'banned' : 'active'}">
+                                        <button type="submit" class="btn btn-sm"
+                                                th:classappend="${u.status == 'active' ? 'btn-danger' : 'btn-success'}"
+                                                th:text="${u.status == 'active' ? '🔒 Cấm' : '🔓 Mở'}">
+                                        </button>
+                                    </form>
+
+                                    <form th:action="@{'/admin/users/delete/' + ${u.id}}" method="post"
+                                          onsubmit="return confirm('Xóa người dùng này?')">
+                                        <button type="submit" class="btn btn-sm btn-outline">🗑</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${users.content.isEmpty()}">
+                            <td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">
+                                Không có người dùng nào
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:replace="~{fragments/layout :: pagination(${users}, '/admin/users')}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

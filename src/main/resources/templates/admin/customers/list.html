@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Khách hàng - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}"/>
+    <style>
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #3949ab; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+        .reset-inline { display: flex; gap: 6px; align-items: center; }
+        .reset-inline input { width: 150px; padding: 4px 8px; border: 1px solid #dde1e7; border-radius: 5px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">🥤 <span>Trà Sữa</span> Admin</div>
+    <nav>
+        <div class="group-label">Tổng quan</div>
+        <a th:href="@{/admin/dashboard}"><span class="icon">📊</span> Dashboard</a>
+        <div class="group-label">Sản phẩm</div>
+        <a th:href="@{/admin/products}"><span class="icon">🧋</span> Sản phẩm</a>
+        <a th:href="@{/admin/products/colors}"><span class="icon">🎨</span> Màu sắc</a>
+        <a th:href="@{/admin/products/sizes}"><span class="icon">📏</span> Size</a>
+        <div class="group-label">Khách hàng</div>
+        <a th:href="@{/admin/customers}" class="active"><span class="icon">👥</span> Khách hàng</a>
+    </nav>
+    <div class="sidebar-footer">
+        <span th:text="${session.username}">Admin</span> &nbsp;|&nbsp;
+        <a th:href="@{/admin/logout}">Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-wrap">
+    <div class="topbar">
+        <h1>👥 Quản lý khách hàng</h1>
+        <div class="admin-info">🔒 Chế độ quản trị</div>
+    </div>
+    <div class="content">
+
+        <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
+        <div th:if="${error}"   class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
+        <div class="card">
+            <div class="card-title">Danh sách khách hàng</div>
+
+            <div class="toolbar">
+                <form th:action="@{/admin/customers}" method="get" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <input type="text" name="keyword" placeholder="Tìm theo tên, username, email..." th:value="${keyword}"/>
+                    <button type="submit" class="btn btn-primary">🔍 Tìm kiếm</button>
+                    <a th:href="@{/admin/customers}" class="btn btn-secondary">↺ Đặt lại</a>
+                </form>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Khách hàng</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Địa chỉ</th>
+                            <th style="text-align:center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${customers == null or #lists.isEmpty(customers)}">
+                            <td colspan="7" style="text-align:center;color:#aaa;padding:30px;">Không có khách hàng nào</td>
+                        </tr>
+                        <tr th:each="kh : ${customers}">
+                            <td th:text="${kh.makh}"></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="avatar"
+                                         th:text="${!#strings.isEmpty(kh.tenkh) ? #strings.toUpperCase(#strings.substring(kh.tenkh,0,1)) : '?'}">T</div>
+                                    <span th:text="${kh.tenkh}">Nguyễn Văn A</span>
+                                </div>
+                            </td>
+                            <td><code th:text="${kh.username}">username</code></td>
+                            <td th:text="${kh.email}">email@example.com</td>
+                            <td th:text="${kh.sodienthoai != null ? kh.sodienthoai : '-'}">0901234567</td>
+                            <td>
+                                <span th:if="${kh.diachi != null and !#strings.isEmpty(kh.diachi)}"
+                                      th:text="${#strings.length(kh.diachi) > 35 ? #strings.substring(kh.diachi,0,35) + '...' : kh.diachi}"
+                                      style="font-size:13px;color:#666;"></span>
+                                <span th:unless="${kh.diachi != null and !#strings.isEmpty(kh.diachi)}" style="color:#ccc;">-</span>
+                            </td>
+                            <td style="text-align:center;white-space:nowrap;">
+                                <a th:href="@{'/admin/customers/edit/' + ${kh.makh}}"
+                                   class="btn btn-warning btn-sm">✏ Sửa</a>
+
+                                <!-- Reset mật khẩu nhanh -->
+                                <button class="btn btn-secondary btn-sm"
+                                        th:data-id="${kh.makh}"
+                                        th:data-name="${kh.tenkh}"
+                                        onclick="showResetForm(this)">🔑 Reset MK</button>
+
+                                <button class="btn btn-danger btn-sm"
+                                        th:data-id="${kh.makh}"
+                                        th:data-name="${kh.tenkh}"
+                                        onclick="confirmDeleteCustomer(this)">🗑 Xóa</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/admin/customers(keyword=${keyword},page=${currentPage-1})}">‹ Trước</a>
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:if="${i != currentPage}"
+                       th:href="@{/admin/customers(keyword=${keyword},page=${i})}"
+                       th:text="${i + 1}"></a>
+                    <span th:if="${i == currentPage}" class="current" th:text="${i + 1}"></span>
+                </th:block>
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/admin/customers(keyword=${keyword},page=${currentPage+1})}">Tiếp ›</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL XÓA KHÁCH HÀNG -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <h3>⚠ Xác nhận xóa</h3>
+        <p id="deleteCustMsg">Bạn có chắc muốn xóa khách hàng này?</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Hủy</button>
+            <form id="deleteCustForm" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger">🗑 Xác nhận xóa</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RESET MẬT KHẨU -->
+<div class="modal-overlay" id="resetModal">
+    <div class="modal-box">
+        <h3>🔑 Reset mật khẩu</h3>
+        <p id="resetCustName" style="margin-bottom:14px;color:#555;">Khách hàng: <strong id="resetName"></strong></p>
+        <form id="resetForm" method="post">
+            <div class="form-group">
+                <label for="newPassword">Mật khẩu mới</label>
+                <input type="password" id="newPassword" name="newPassword"
+                       minlength="6" required placeholder="Tối thiểu 6 ký tự"/>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('resetModal')">Hủy</button>
+                <button type="submit" class="btn btn-warning">🔑 Đặt lại mật khẩu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function confirmDeleteCustomer(btn) {
+    document.getElementById('deleteCustMsg').textContent = 'Xóa tài khoản "' + btn.dataset.name + '"?';
+    document.getElementById('deleteCustForm').action = '/admin/customers/delete/' + btn.dataset.id;
+    document.getElementById('deleteModal').classList.add('open');
+}
+function showResetForm(btn) {
+    document.getElementById('resetName').textContent = btn.dataset.name;
+    document.getElementById('resetForm').action = '/admin/customers/reset-password/' + btn.dataset.id;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('resetModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>

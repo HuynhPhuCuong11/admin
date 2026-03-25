@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - Admin'">Đơn hàng</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content" id="mainContent">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="page-body">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Danh sách đơn hàng</span>
+                </div>
+                <div class="card-body" style="padding-bottom:0">
+                    <div class="filter-bar">
+                        <form method="get" th:action="@{/admin/orders}">
+                            <input type="text" name="keyword" class="search-input"
+                                   placeholder="Tìm mã đơn, tên, SĐT..." th:value="${keyword}">
+                            <select name="orderStatus" class="filter-select">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="pending"    th:selected="${orderStatus=='pending'}">Chờ xác nhận</option>
+                                <option value="confirmed"  th:selected="${orderStatus=='confirmed'}">Đã xác nhận</option>
+                                <option value="processing" th:selected="${orderStatus=='processing'}">Đang xử lý</option>
+                                <option value="shipped"    th:selected="${orderStatus=='shipped'}">Đang giao</option>
+                                <option value="delivered"  th:selected="${orderStatus=='delivered'}">Đã giao</option>
+                                <option value="cancelled"  th:selected="${orderStatus=='cancelled'}">Đã hủy</option>
+                            </select>
+                            <select name="payStatus" class="filter-select">
+                                <option value="">Tất cả thanh toán</option>
+                                <option value="pending" th:selected="${payStatus=='pending'}">Chưa thanh toán</option>
+                                <option value="paid"    th:selected="${payStatus=='paid'}">Đã thanh toán</option>
+                                <option value="failed"  th:selected="${payStatus=='failed'}">Thất bại</option>
+                            </select>
+                            <button type="submit" class="btn btn-secondary btn-sm">🔍 Tìm</button>
+                            <a th:href="@{/admin/orders}" class="btn btn-outline btn-sm">↺ Reset</a>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>SĐT</th>
+                            <th>Tổng tiền</th>
+                            <th>Thanh toán</th>
+                            <th>Trạng thái đơn</th>
+                            <th>Ngày đặt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="o : ${orders.content}">
+                            <td>
+                                <span style="font-weight:600;font-size:12px;color:var(--primary)"
+                                      th:text="${o.orderNo}">ORD-001</span>
+                            </td>
+                            <td th:text="${o.customerName}">Khách</td>
+                            <td th:text="${o.customerPhone}">0901...</td>
+                            <td style="font-weight:600;color:var(--success)"
+                                th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="'status-' + ${o.payStatus}"
+                                      th:text="${o.payStatus == 'paid' ? 'Đã TT' : o.payStatus == 'pending' ? 'Chưa TT' : 'Thất bại'}">
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="'status-' + ${o.orderStatus}"
+                                      th:text="${
+                                        o.orderStatus == 'pending' ? 'Chờ xác nhận' :
+                                        o.orderStatus == 'confirmed' ? 'Đã xác nhận' :
+                                        o.orderStatus == 'processing' ? 'Đang xử lý' :
+                                        o.orderStatus == 'shipped' ? 'Đang giao' :
+                                        o.orderStatus == 'delivered' ? 'Đã giao' : 'Đã hủy'}">
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}">—</td>
+                            <td>
+                                <a th:href="@{'/admin/orders/' + ${o.id}}"
+                                   class="btn btn-sm btn-primary">👁 Chi tiết</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${orders.content.isEmpty()}">
+                            <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">
+                                Không có đơn hàng nào
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:replace="~{fragments/layout :: pagination(${orders}, '/admin/orders')}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

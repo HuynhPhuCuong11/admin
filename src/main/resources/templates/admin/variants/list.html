@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Biến thể - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}"/>
+    <style>
+        .product-banner { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; }
+        .product-banner img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .product-banner .pname { font-size: 16px; font-weight: 600; color: #1565c0; }
+        .product-banner .pid { font-size: 12px; color: #888; }
+        .add-variant-form { background: #f8fafc; border: 1px dashed #c5cae9; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .add-variant-form .form-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: #3949ab; }
+        .stock-low  { color: #e65100; font-weight: 600; }
+        .stock-zero { color: #c62828; font-weight: 600; }
+        .stock-ok   { color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">🥤 <span>Trà Sữa</span> Admin</div>
+    <nav>
+        <div class="group-label">Tổng quan</div>
+        <a th:href="@{/admin/dashboard}"><span class="icon">📊</span> Dashboard</a>
+        <div class="group-label">Sản phẩm</div>
+        <a th:href="@{/admin/products}" class="active"><span class="icon">🧋</span> Sản phẩm</a>
+        <a th:href="@{/admin/products/colors}"><span class="icon">🎨</span> Màu sắc</a>
+        <a th:href="@{/admin/products/sizes}"><span class="icon">📏</span> Size</a>
+        <div class="group-label">Khách hàng</div>
+        <a th:href="@{/admin/customers}"><span class="icon">👥</span> Khách hàng</a>
+    </nav>
+    <div class="sidebar-footer">
+        <span th:text="${session.username}">Admin</span> &nbsp;|&nbsp;
+        <a th:href="@{/admin/logout}">Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-wrap">
+    <div class="topbar">
+        <h1>⚙ Quản lý biến thể</h1>
+        <div class="admin-info">🔒 Chế độ quản trị</div>
+    </div>
+    <div class="content">
+
+        <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
+        <div th:if="${error}"   class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
+        <!-- THÔNG TIN SẢN PHẨM CHA -->
+        <div class="product-banner">
+            <img th:if="${product.hinh != null and !#strings.isEmpty(product.hinh)}"
+                 th:src="@{'/images/' + ${product.hinh}}" th:alt="${product.tenhh}"
+                 onerror="this.style.display='none'"/>
+            <div>
+                <div class="pname" th:text="${product.tenhh}">Tên sản phẩm</div>
+                <div class="pid">ID: <span th:text="${product.mahh}"></span> &nbsp;|&nbsp;
+                    <a th:href="@{'/admin/products/edit/' + ${product.mahh}}" style="color:#1976d2;text-decoration:none;">✏ Sửa thông tin</a>
+                </div>
+            </div>
+            <a th:href="@{/admin/products}" class="btn btn-secondary btn-sm" style="margin-left:auto;">← Về danh sách</a>
+        </div>
+
+        <!-- FORM THÊM BIẾN THỂ -->
+        <div class="add-variant-form">
+            <div class="form-title">➕ Thêm biến thể mới</div>
+            <form th:action="@{'/admin/products/' + ${product.mahh} + '/variants/add'}" method="post">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;flex-wrap:wrap;">
+                    <div class="form-group" style="margin:0;">
+                        <label>Màu sắc <span style="color:#d32f2f;">*</span></label>
+                        <select name="idmau" required>
+                            <option value="">-- Chọn màu --</option>
+                            <option th:each="c : ${colors}" th:value="${c.idmau}" th:text="${c.mausac}">Đen</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Size <span style="color:#d32f2f;">*</span></label>
+                        <select name="idsize" required>
+                            <option value="">-- Chọn size --</option>
+                            <option th:each="s : ${sizes}" th:value="${s.idsize}" th:text="${s.size}">40</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Đơn giá (₫) <span style="color:#d32f2f;">*</span></label>
+                        <input type="number" name="dongia" step="1000" min="0" required placeholder="350000"/>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Số lượng tồn</label>
+                        <input type="number" name="soluongton" min="0" value="0" placeholder="0"/>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-success">➕ Thêm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- DANH SÁCH BIẾN THỂ -->
+        <div class="card">
+            <div class="card-title">📋 Danh sách biến thể
+                <span style="font-size:12px;font-weight:400;color:#888;margin-left:8px;"
+                      th:text="${variants != null ? '(' + #lists.size(variants) + ' biến thể)' : '(0 biến thể)'}"></span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Màu sắc</th>
+                            <th>Size</th>
+                            <th>Đơn giá</th>
+                            <th>Tồn kho</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align:center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${variants == null or #lists.isEmpty(variants)}">
+                            <td colspan="6" style="text-align:center;color:#aaa;padding:28px;">
+                                Chưa có biến thể nào. Thêm biến thể ở form phía trên.
+                            </td>
+                        </tr>
+                        <tr th:each="v : ${variants}">
+                            <td>
+                                <span th:text="${v.mausac != null ? v.mausac.mausac : '?'}">Đen</span>
+                            </td>
+                            <td>
+                                <strong th:text="${v.sizegiay != null ? v.sizegiay.size : '?'}">40</strong>
+                            </td>
+                            <td>
+                                <span th:text="${#numbers.formatDecimal(v.dongia, 0, 'COMMA', 0, 'POINT') + ' ₫'}">350,000 ₫</span>
+                            </td>
+                            <td>
+                                <span th:classappend="${v.soluongton == null or v.soluongton == 0} ? 'stock-zero' : (${v.soluongton < 5} ? 'stock-low' : 'stock-ok')"
+                                      th:text="${v.soluongton != null ? v.soluongton : 0}">10</span>
+                            </td>
+                            <td>
+                                <span th:if="${v.soluongton == null or v.soluongton == 0}" class="badge badge-danger">Hết hàng</span>
+                                <span th:if="${v.soluongton != null and v.soluongton > 0 and v.soluongton < 5}" class="badge badge-warning">Sắp hết</span>
+                                <span th:if="${v.soluongton != null and v.soluongton >= 5}" class="badge badge-success">Còn hàng</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <button class="btn btn-danger btn-sm"
+                                        th:data-mahh="${v.idhanghoa}"
+                                        th:data-mau="${v.mausac != null ? v.mausac.mausac : ''}"
+                                        th:data-size="${v.sizegiay != null ? v.sizegiay.size : ''}"
+                                        th:data-idmau="${v.idmau}"
+                                        th:data-idsize="${v.idsize}"
+                                        onclick="confirmDeleteVariant(this)">🗑 Xóa</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL XÓA BIẾN THỂ -->
+<div class="modal-overlay" id="variantModal">
+    <div class="modal-box">
+        <h3>⚠ Xóa biến thể</h3>
+        <p id="variantMsg">Bạn có chắc muốn xóa biến thể này?</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeVariantModal()">Hủy</button>
+            <form id="variantDeleteForm" method="post" style="display:inline;">
+                <input type="hidden" name="idmau"  id="hiddenIdmau"/>
+                <input type="hidden" name="idsize" id="hiddenIdsize"/>
+                <button type="submit" class="btn btn-danger">🗑 Xác nhận xóa</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const productId = /*[[${product.mahh}]]*/ 0;
+function confirmDeleteVariant(btn) {
+    document.getElementById('variantMsg').textContent =
+        'Xóa biến thể: màu ' + btn.dataset.mau + ', size ' + btn.dataset.size + '?';
+    document.getElementById('hiddenIdmau').value  = btn.dataset.idmau;
+    document.getElementById('hiddenIdsize').value = btn.dataset.idsize;
+    document.getElementById('variantDeleteForm').action = '/admin/products/' + productId + '/variants/delete';
+    document.getElementById('variantModal').classList.add('open');
+}
+function closeVariantModal() { document.getElementById('variantModal').classList.remove('open'); }
+document.getElementById('variantModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeVariantModal(); });
+</script>
+</body>
+</html>

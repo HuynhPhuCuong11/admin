@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Size - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}"/>
+    <style>
+        .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start; }
+        @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+        .size-pill { display: inline-block; background: #e8edf2; border-radius: 20px; padding: 4px 14px; font-size: 15px; font-weight: 700; color: #3949ab; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">🥤 <span>Trà Sữa</span> Admin</div>
+    <nav>
+        <div class="group-label">Tổng quan</div>
+        <a th:href="@{/admin/dashboard}"><span class="icon">📊</span> Dashboard</a>
+        <div class="group-label">Sản phẩm</div>
+        <a th:href="@{/admin/products}"><span class="icon">🧋</span> Sản phẩm</a>
+        <a th:href="@{/admin/products/colors}"><span class="icon">🎨</span> Màu sắc</a>
+        <a th:href="@{/admin/products/sizes}" class="active"><span class="icon">📏</span> Size</a>
+        <div class="group-label">Khách hàng</div>
+        <a th:href="@{/admin/customers}"><span class="icon">👥</span> Khách hàng</a>
+    </nav>
+    <div class="sidebar-footer">
+        <span th:text="${session.username}">Admin</span> &nbsp;|&nbsp;
+        <a th:href="@{/admin/logout}">Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-wrap">
+    <div class="topbar">
+        <h1>📏 Quản lý size giày</h1>
+        <div class="admin-info">🔒 Chế độ quản trị</div>
+    </div>
+    <div class="content">
+
+        <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
+        <div th:if="${error}"   class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
+        <div class="two-col">
+
+            <!-- FORM THÊM SIZE -->
+            <div class="card">
+                <div class="card-title">➕ Thêm size mới</div>
+                <form th:action="@{/admin/products/sizes/add}" method="post">
+                    <div class="form-group">
+                        <label for="size">Số size <span style="color:#d32f2f;">*</span></label>
+                        <input type="number" id="size" name="size" required min="30" max="50"
+                               placeholder="Ví dụ: 38, 39, 40, 41..."/>
+                        <span style="font-size:12px;color:#888;margin-top:4px;display:block;">Thông thường từ 35 đến 46</span>
+                    </div>
+                    <div class="form-actions" style="margin-top:12px;">
+                        <button type="submit" class="btn btn-success">➕ Thêm size</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- DANH SÁCH SIZE -->
+            <div class="card">
+                <div class="card-title">📏 Danh sách size
+                    <span style="font-size:12px;font-weight:400;color:#888;"
+                          th:text="${sizes != null ? '(' + #lists.size(sizes) + ' size)' : ''}"></span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Size</th>
+                                <th style="text-align:center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${sizes == null or #lists.isEmpty(sizes)}">
+                                <td colspan="3" style="text-align:center;color:#aaa;padding:24px;">Chưa có size nào</td>
+                            </tr>
+                            <tr th:each="s : ${sizes}">
+                                <td th:text="${s.idsize}"></td>
+                                <td>
+                                    <span class="size-pill" th:text="${s.size}">40</span>
+                                </td>
+                                <td style="text-align:center;">
+                                    <button class="btn btn-danger btn-sm"
+                                            th:data-id="${s.idsize}"
+                                            th:data-size="${s.size}"
+                                            onclick="confirmDeleteSize(this)">🗑 Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL XÓA -->
+<div class="modal-overlay" id="sizeDeleteModal">
+    <div class="modal-box">
+        <h3>⚠ Xóa size</h3>
+        <p id="sizeDeleteMsg">Bạn có chắc muốn xóa size này?</p>
+        <div class="alert alert-info" style="margin-bottom:12px;">⚠ Lưu ý: Không thể xóa size đang được dùng trong biến thể sản phẩm.</div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeSizeModal()">Hủy</button>
+            <form id="sizeDeleteForm" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger">🗑 Xóa</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDeleteSize(btn) {
+    document.getElementById('sizeDeleteMsg').textContent = 'Xóa size ' + btn.dataset.size + '?';
+    document.getElementById('sizeDeleteForm').action = '/admin/products/sizes/delete/' + btn.dataset.id;
+    document.getElementById('sizeDeleteModal').classList.add('open');
+}
+function closeSizeModal() { document.getElementById('sizeDeleteModal').classList.remove('open'); }
+document.getElementById('sizeDeleteModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSizeModal(); });
+</script>
+</body>
+</html>
