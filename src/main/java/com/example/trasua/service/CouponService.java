@@ -16,6 +16,8 @@ import java.util.Optional;
 @Service
 public class CouponService {
 
+    private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+
     @Autowired private CouponRepository couponRepo;
 
     public Page<Coupon> search(String keyword, String status, Pageable pageable) {
@@ -86,7 +88,7 @@ public class CouponService {
         BigDecimal discount;
         if ("percent".equals(coupon.getDiscountType())) {
             discount = orderAmount.multiply(coupon.getDiscountValue())
-                    .divide(BigDecimal.valueOf(100));
+                    .divide(HUNDRED);
             if (coupon.getMaxDiscountAmount() != null
                     && discount.compareTo(coupon.getMaxDiscountAmount()) > 0) {
                 discount = coupon.getMaxDiscountAmount();
