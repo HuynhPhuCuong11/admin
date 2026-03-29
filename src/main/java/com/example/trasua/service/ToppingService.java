@@ -7,47 +7,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
 public class ToppingService {
+    @Autowired private ToppingRepository repo;
 
-    @Autowired private ToppingRepository toppingRepo;
-
-    public Page<Topping> search(String keyword, String status, Pageable pageable) {
-        String kw = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
-        String st = (status == null || status.isBlank()) ? null : status;
-        return toppingRepo.search(kw, st, pageable);
+    public Page<Topping> search(String kw, String status, Pageable p) {
+        return repo.search(blank(kw), blank(status), p);
     }
-
-    public List<Topping> findAll() {
-        return toppingRepo.findAll();
+    public List<Topping> findAll()    { return repo.findAll(); }
+    public Topping findById(Long id)  { return repo.findById(id).orElseThrow(()->new RuntimeException("Topping không tồn tại")); }
+    @Transactional public Topping save(Topping t) { return repo.save(t); }
+    @Transactional public void delete(Long id)    { repo.deleteById(id); }
+    @Transactional public void toggleStock(Long id) {
+        Topping t = findById(id); t.setInStock(!Boolean.TRUE.equals(t.getInStock())); repo.save(t);
     }
-
-    public Topping findById(Long id) {
-        return toppingRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Topping không tồn tại"));
-    }
-
-    @Transactional
-    public Topping save(Topping topping) {
-        return toppingRepo.save(topping);
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        toppingRepo.deleteById(id);
-    }
-
-    @Transactional
-    public void toggleStock(Long id) {
-        Topping t = findById(id);
-        t.setInStock(!t.getInStock());
-        toppingRepo.save(t);
-    }
-
-    public long countAll() {
-        return toppingRepo.count();
-    }
+    public long countAll() { return repo.count(); }
+    private String blank(String s) { return (s==null||s.isBlank())?null:s.trim(); }
 }

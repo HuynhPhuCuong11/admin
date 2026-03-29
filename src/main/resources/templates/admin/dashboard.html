@@ -1,136 +1,117 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle} + ' - Trà Sữa Admin'">Dashboard</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard - Admin</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 <body>
-<div class="admin-wrapper">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <div class="main-content" id="mainContent">
-        <div th:replace="~{fragments/layout :: topbar}"></div>
-
-        <div class="page-body">
-            <div th:replace="~{fragments/layout :: alerts}"></div>
-
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon orange">🛒</div>
-                    <div class="stat-info">
-                        <div class="stat-value" th:text="${totalOrders}">0</div>
-                        <div class="stat-label">Tổng đơn hàng</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon blue">⏳</div>
-                    <div class="stat-info">
-                        <div class="stat-value" th:text="${pendingOrders}">0</div>
-                        <div class="stat-label">Chờ xác nhận</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon green">✅</div>
-                    <div class="stat-info">
-                        <div class="stat-value" th:text="${deliveredOrders}">0</div>
-                        <div class="stat-label">Đã giao hàng</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon teal">💰</div>
-                    <div class="stat-info">
-                        <div class="stat-value"
-                             th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
-                        <div class="stat-label">Tổng doanh thu</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon purple">📦</div>
-                    <div class="stat-info">
-                        <div class="stat-value" th:text="${totalProducts}">0</div>
-                        <div class="stat-label">Sản phẩm</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon blue">👥</div>
-                    <div class="stat-info">
-                        <div class="stat-value" th:text="${totalUsers}">0</div>
-                        <div class="stat-label">Người dùng</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Row 2: Today stats -->
-            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 28px;">
-                <div class="card" style="margin:0">
-                    <div class="card-body" style="text-align:center;padding:20px">
-                        <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Đơn hôm nay</div>
-                        <div style="font-size:32px;font-weight:700;color:var(--primary)" th:text="${ordersToday}">0</div>
-                    </div>
-                </div>
-                <div class="card" style="margin:0">
-                    <div class="card-body" style="text-align:center;padding:20px">
-                        <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Doanh thu hôm nay</div>
-                        <div style="font-size:32px;font-weight:700;color:var(--success)"
-                             th:text="${#numbers.formatDecimal(revenueToday, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
-                    </div>
-                </div>
-                <div class="card" style="margin:0">
-                    <div class="card-body" style="text-align:center;padding:20px">
-                        <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Đang xử lý</div>
-                        <div style="font-size:32px;font-weight:700;color:var(--warning)" th:text="${processingOrders}">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick links -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Thao tác nhanh</span>
-                </div>
-                <div class="card-body">
-                    <div style="display:flex;flex-wrap:wrap;gap:12px">
-                        <a th:href="@{/admin/products/create}" class="btn btn-primary">➕ Thêm sản phẩm</a>
-                        <a th:href="@{/admin/orders?orderStatus=pending}" class="btn btn-warning">⏳ Đơn chờ xác nhận</a>
-                        <a th:href="@{/admin/categories/create}" class="btn btn-outline">📂 Thêm danh mục</a>
-                        <a th:href="@{/admin/toppings/create}" class="btn btn-outline">🧆 Thêm topping</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order status overview -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Trạng thái đơn hàng</span>
-                    <a th:href="@{/admin/orders}" class="btn btn-sm btn-outline">Xem tất cả</a>
-                </div>
-                <div class="card-body">
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">
-                        <div style="text-align:center;padding:14px;background:#f7f9fc;border-radius:8px">
-                            <div style="font-size:22px;font-weight:700;color:var(--warning)" th:text="${pendingOrders}">0</div>
-                            <div style="font-size:12px;color:var(--text-muted)">Chờ xác nhận</div>
-                        </div>
-                        <div style="text-align:center;padding:14px;background:#f7f9fc;border-radius:8px">
-                            <div style="font-size:22px;font-weight:700;color:var(--info)" th:text="${processingOrders}">0</div>
-                            <div style="font-size:12px;color:var(--text-muted)">Đang xử lý</div>
-                        </div>
-                        <div style="text-align:center;padding:14px;background:#f7f9fc;border-radius:8px">
-                            <div style="font-size:22px;font-weight:700;color:var(--success)" th:text="${deliveredOrders}">0</div>
-                            <div style="font-size:12px;color:var(--text-muted)">Đã giao</div>
-                        </div>
-                        <div style="text-align:center;padding:14px;background:#f7f9fc;border-radius:8px">
-                            <div style="font-size:22px;font-weight:700;color:var(--danger)" th:text="${cancelledOrders}">0</div>
-                            <div style="font-size:12px;color:var(--text-muted)">Đã hủy</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Stats row 1 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon si-orange">🛒</div>
+          <div><div class="stat-val" th:text="${totalOrders}">0</div><div class="stat-lbl">Tổng đơn hàng</div></div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon si-blue">⏳</div>
+          <div><div class="stat-val" th:text="${pendingOrders}">0</div><div class="stat-lbl">Chờ xác nhận</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green">✅</div>
+          <div><div class="stat-val" th:text="${deliveredOrders}">0</div><div class="stat-lbl">Đã giao hàng</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-teal">💰</div>
+          <div>
+            <div class="stat-val" th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')}+'₫'">0₫</div>
+            <div class="stat-lbl">Tổng doanh thu</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-purple">📦</div>
+          <div><div class="stat-val" th:text="${totalProducts}">0</div><div class="stat-lbl">Sản phẩm</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-blue">👥</div>
+          <div><div class="stat-val" th:text="${totalUsers}">0</div><div class="stat-lbl">Người dùng</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-pink">🏷️</div>
+          <div><div class="stat-val" th:text="${totalCoupons}">0</div><div class="stat-lbl">Mã giảm giá</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-orange">⭐</div>
+          <div><div class="stat-val" th:text="${pendingReviews}">0</div><div class="stat-lbl">Đánh giá chờ duyệt</div></div>
+        </div>
+      </div>
+
+      <!-- Today -->
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+        <div class="card" style="margin:0">
+          <div class="card-body" style="text-align:center">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Đơn hôm nay</div>
+            <div style="font-size:30px;font-weight:700;color:var(--primary)" th:text="${ordersToday}">0</div>
+          </div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-body" style="text-align:center">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Doanh thu hôm nay</div>
+            <div style="font-size:30px;font-weight:700;color:var(--success)"
+                 th:text="${#numbers.formatDecimal(revenueToday,0,'COMMA',0,'POINT')}+'₫'">0₫</div>
+          </div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-body" style="text-align:center">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Đang xử lý</div>
+            <div style="font-size:30px;font-weight:700;color:var(--warning)" th:text="${processingOrders}">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px;margin-bottom:22px">
+        <div class="card" style="margin:0">
+          <div class="card-header"><span class="card-title">📈 Doanh thu 7 ngày</span></div>
+          <div class="card-body"><div class="chart-wrap"><canvas id="revenueChart"></canvas></div></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-header"><span class="card-title">🥧 Đơn theo trạng thái</span></div>
+          <div class="card-body"><div class="chart-wrap"><canvas id="statusChart"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">⚡ Thao tác nhanh</span></div>
+        <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px">
+          <a th:href="@{/admin/products/create}"         class="btn btn-primary">➕ Thêm sản phẩm</a>
+          <a th:href="@{/admin/orders?orderStatus=pending}" class="btn btn-warning">⏳ Đơn chờ xác nhận</a>
+          <a th:href="@{/admin/coupons/create}"          class="btn btn-info">🏷️ Tạo mã giảm giá</a>
+          <a th:href="@{/admin/reviews?status=pending}"  class="btn btn-secondary">⭐ Duyệt đánh giá</a>
+          <a th:href="@{/admin/banners/create}"          class="btn btn-outline">🖼️ Thêm banner</a>
+          <a th:href="@{/admin/categories/create}"       class="btn btn-outline">📂 Thêm danh mục</a>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script th:src="@{/js/admin.js}"></script>
+<script th:inline="javascript">
+  const rcLabels = /*[[${revenueChart.keySet()}]]*/ [];
+  const rcData   = /*[[${revenueChart.values()}]]*/ [];
+  const scLabels = /*[[${statusChart.keySet()}]]*/ [];
+  const scData   = /*[[${statusChart.values()}]]*/ [];
+  initRevenueChart(rcLabels, rcData);
+  initStatusChart(scLabels, scData);
+</script>
 </body>
 </html>

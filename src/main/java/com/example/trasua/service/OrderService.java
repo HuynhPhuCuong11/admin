@@ -10,31 +10,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class OrderService {
+    @Autowired private OrderRepository repo;
 
-    @Autowired private OrderRepository orderRepo;
-
-    public Page<Order> search(String keyword, String orderStatus, String payStatus, Pageable pageable) {
-        String kw = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
-        String os = (orderStatus == null || orderStatus.isBlank()) ? null : orderStatus;
-        String ps = (payStatus == null || payStatus.isBlank()) ? null : payStatus;
-        return orderRepo.search(kw, os, ps, pageable);
+    public Page<Order> search(String kw, String orderStatus, String payStatus, Pageable p) {
+        return repo.search(blank(kw), blank(orderStatus), blank(payStatus), p);
     }
 
     public Order findById(Long id) {
-        return orderRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
+        return repo.findById(id).orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
     }
 
     @Transactional
-    public void updateStatus(Long id, String orderStatus, String payStatus, String note) {
+    public void updateStatus(Long id, String orderStatus, String payStatus, String note, String tracking) {
         Order o = findById(id);
-        if (orderStatus != null && !orderStatus.isBlank()) o.setOrderStatus(orderStatus);
-        if (payStatus != null && !payStatus.isBlank()) o.setPayStatus(payStatus);
-        if (note != null && !note.isBlank()) o.setInternalNote(note);
-        orderRepo.save(o);
+        if (!blank(orderStatus).equals("")) o.setOrderStatus(orderStatus);
+        if (!blank(payStatus).equals(""))   o.setPayStatus(payStatus);
+        if (note     != null && !note.isBlank())     o.setInternalNote(note);
+        if (tracking != null && !tracking.isBlank()) o.setTrackingNumber(tracking);
+        repo.save(o);
     }
 
     @Transactional
@@ -42,19 +39,19 @@ public class OrderService {
         Order o = findById(id);
         o.setOrderStatus("cancelled");
         o.setCancelReason(reason);
-        orderRepo.save(o);
+        repo.save(o);
     }
 
-    // ---- Dashboard stats ----
-    public long countAll() { return orderRepo.count(); }
-    public long countByStatus(String status) { return orderRepo.countByOrderStatus(status); }
-    public BigDecimal totalRevenue() { return orderRepo.sumRevenue(); }
-
-    public BigDecimal revenueToday() {
-        return orderRepo.sumRevenueFrom(LocalDateTime.now().toLocalDate().atStartOfDay());
+    // Stats
+    public long countAll()              { return repo.count(); }
+    public long countByStatus(String s) { return repo.countByOrderStatus(s); }
+    public BigDecimal totalRevenue()    { return repo.sumRevenue(); }
+    public BigDecimal revenueToday()    { return repo.sumRevenueFrom(LocalDateTime.now().toLocalDate().atStartOfDay()); }
+    public long ordersToday()           { return repo.countFrom(LocalDateTime.now().toLocalDate().atStartOfDay()); }
+    public List<Object[]> revenueByDay(int days) {
+        return repo.revenueByDay(LocalDateTime.now().minusDays(days));
     }
+    public List<Object[]> countGroupByStatus() { return repo.countGroupByStatus(); }
 
-    public long ordersToday() {
-        return orderRepo.countOrdersFrom(LocalDateTime.now().toLocalDate().atStartOfDay());
-    }
+    private String blank(String s) { return (s == null || s.isBlank()) ? "" : s.trim(); }
 }

@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "toppings")
 public class Topping {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Tên topping không được để trống")
@@ -23,7 +22,7 @@ public class Topping {
     @Column(name = "in_stock")
     private Boolean inStock = true;
 
-    private String status = "active"; // active, inactive
+    private String status = "active"; // active | inactive
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -31,27 +30,20 @@ public class Topping {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @PreUpdate
-    public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
+    @PreUpdate public void onUpdate() { this.updatedAt = LocalDateTime.now(); }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
-
     public Boolean getInStock() { return inStock; }
     public void setInStock(Boolean inStock) { this.inStock = inStock; }
-
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
+    public void setCreatedAt(LocalDateTime v) { this.createdAt = v; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setUpdatedAt(LocalDateTime v) { this.updatedAt = v; }
 }

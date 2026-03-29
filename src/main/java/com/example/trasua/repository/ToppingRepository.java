@@ -9,9 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ToppingRepository extends JpaRepository<Topping, Long> {
     @Query("SELECT t FROM Topping t WHERE " +
-           "(:keyword IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%',:keyword,'%'))) " +
+           "(:kw IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%',:kw,'%'))) " +
            "AND (:status IS NULL OR t.status = :status)")
-    Page<Topping> search(@Param("keyword") String keyword,
-                         @Param("status") String status,
-                         Pageable pageable);
+    Page<Topping> search(@Param("kw") String kw, @Param("status") String status, Pageable pageable);
 }

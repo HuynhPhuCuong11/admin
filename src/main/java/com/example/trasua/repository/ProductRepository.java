@@ -9,15 +9,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsBySlug(String slug);
+    long countByStatus(String status);
 
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE " +
-           "(:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%',:keyword,'%'))) " +
+           "(:kw IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))) " +
            "AND (:categoryId IS NULL OR p.categoryId = :categoryId) " +
            "AND (:status IS NULL OR p.status = :status)")
-    Page<Product> search(@Param("keyword") String keyword,
-                         @Param("categoryId") Long categoryId,
-                         @Param("status") String status,
-                         Pageable pageable);
-
-    long countByStatus(String status);
+    Page<Product> search(@Param("kw") String kw, @Param("categoryId") Long categoryId,
+                         @Param("status") String status, Pageable pageable);
 }

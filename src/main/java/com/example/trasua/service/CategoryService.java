@@ -5,59 +5,40 @@ import com.example.trasua.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
 public class CategoryService {
+    @Autowired private CategoryRepository repo;
 
-    @Autowired private CategoryRepository categoryRepo;
-
-    public List<Category> findAll() {
-        return categoryRepo.findAll();
-    }
-
-    public List<Category> findRoots() {
-        return categoryRepo.findByParentIdIsNullOrderBySortOrderAsc();
-    }
-
-    public List<Category> findChildren(Long parentId) {
-        return categoryRepo.findByParentIdOrderBySortOrderAsc(parentId);
-    }
-
-    public List<Category> findActive() {
-        return categoryRepo.findByActiveTrue();
-    }
+    public List<Category> findAll()   { return repo.findAll(); }
+    public List<Category> findRoots() { return repo.findByParentIdIsNullOrderBySortOrderAsc(); }
+    public List<Category> findActive(){ return repo.findByActiveTrueOrderBySortOrderAsc(); }
 
     public Category findById(Long id) {
-        return categoryRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+        return repo.findById(id).orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
     }
 
     @Transactional
-    public Category save(Category category) {
-        if (category.getSlug() == null || category.getSlug().isBlank()) {
-            category.setSlug(ProductService.generateSlug(category.getName()));
+    public Category save(Category c) {
+        if (c.getSlug() == null || c.getSlug().isBlank()) c.setSlug(ProductService.toSlug(c.getName()));
+        String base = c.getSlug(), slug = base; int i = 1;
+        while (repo.existsBySlug(slug)) {
+            if (c.getId() != null) {
+                final String check = slug; // capture current slug for lambda (must be effectively final)
+                if (repo.findById(c.getId()).map(x -> x.getSlug().equals(check)).orElse(false)) break;
+            }
+            slug = base + "-" + i++;
         }
-        String baseSlug = category.getSlug();
-        String finalSlug = baseSlug;
-        int i = 1;
-        String finalSlug1 = finalSlug;
-        while (categoryRepo.existsBySlug(finalSlug) &&
-               (category.getId() == null || !categoryRepo.findById(category.getId())
-                       .map(c -> c.getSlug().equals(finalSlug1)).orElse(false))) {
-            finalSlug = baseSlug + "-" + i++;
-        }
-        category.setSlug(finalSlug);
-        return categoryRepo.save(category);
+        c.setSlug(slug);
+        return repo.save(c);
     }
 
     @Transactional
-    public void delete(Long id) {
-        categoryRepo.deleteById(id);
-    }
+    public void delete(Long id)  { repo.deleteById(id); }
 
-    public long countAll() {
-        return categoryRepo.count();
-    }
+    @Transactional
+    public void toggle(Long id)  { Category c = findById(id); c.setActive(!Boolean.TRUE.equals(c.getActive())); repo.save(c); }
+
+    public long countAll() { return repo.count(); }
 }

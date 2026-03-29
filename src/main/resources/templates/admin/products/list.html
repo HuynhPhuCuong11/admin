@@ -1,117 +1,79 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${pageTitle} + ' - Admin'">Sản phẩm</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head><meta charset="UTF-8"><title>Sản phẩm - Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
 <body>
-<div class="admin-wrapper">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
-    <div class="main-content" id="mainContent">
-        <div th:replace="~{fragments/layout :: topbar}"></div>
-        <div class="page-body">
-            <div th:replace="~{fragments/layout :: alerts}"></div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Danh sách sản phẩm</span>
-                    <a th:href="@{/admin/products/create}" class="btn btn-primary btn-sm">➕ Thêm sản phẩm</a>
-                </div>
-
-                <!-- Filter bar -->
-                <div class="card-body" style="padding-bottom:0">
-                    <div class="filter-bar">
-                        <form method="get" th:action="@{/admin/products}">
-                            <input type="text" name="keyword" class="search-input"
-                                   placeholder="Tìm tên sản phẩm..." th:value="${keyword}">
-                            <select name="categoryId" class="filter-select">
-                                <option value="">Tất cả danh mục</option>
-                                <option th:each="c : ${categories}"
-                                        th:value="${c.id}"
-                                        th:text="${c.name}"
-                                        th:selected="${c.id == categoryId}"></option>
-                            </select>
-                            <select name="status" class="filter-select">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="published" th:selected="${status == 'published'}">Đang bán</option>
-                                <option value="draft"     th:selected="${status == 'draft'}">Nháp</option>
-                                <option value="archived"  th:selected="${status == 'archived'}">Lưu trữ</option>
-                            </select>
-                            <button type="submit" class="btn btn-secondary btn-sm">🔍 Tìm</button>
-                            <a th:href="@{/admin/products}" class="btn btn-outline btn-sm">↺ Reset</a>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="table-wrap">
-                    <table class="admin-table">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Ảnh</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Danh mục</th>
-                            <th>Trạng thái</th>
-                            <th>Nổi bật</th>
-                            <th>Ngày tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="p, stat : ${products.content}">
-                            <td th:text="${products.number * products.size + stat.index + 1}">1</td>
-                            <td>
-                                <img th:if="${p.defaultImage != null}"
-                                     th:src="@{'/images/products/' + ${p.defaultImage}}"
-                                     class="product-thumb" alt="">
-                                <div th:if="${p.defaultImage == null}"
-                                     style="width:44px;height:44px;background:#f0f2f7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🍵</div>
-                            </td>
-                            <td>
-                                <div style="font-weight:500" th:text="${p.name}">Tên</div>
-                                <div style="font-size:11px;color:var(--text-muted)" th:text="${p.slug}">slug</div>
-                            </td>
-                            <td th:text="${p.category != null ? p.category.name : '—'}">—</td>
-                            <td>
-                                <span class="status-badge"
-                                      th:classappend="'status-' + ${p.status}"
-                                      th:text="${p.status == 'published' ? 'Đang bán' : p.status == 'draft' ? 'Nháp' : 'Lưu trữ'}">
-                                </span>
-                            </td>
-                            <td style="text-align:center">
-                                <form th:action="@{'/admin/products/toggle-featured/' + ${p.id}}" method="post" style="display:inline">
-                                    <button type="submit" class="btn btn-icon" title="Toggle nổi bật"
-                                            th:text="${p.isFeatured ? '⭐' : '☆'}"></button>
-                                </form>
-                            </td>
-                            <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy')}">—</td>
-                            <td>
-                                <div style="display:flex;gap:6px">
-                                    <a th:href="@{'/admin/products/edit/' + ${p.id}}"
-                                       class="btn btn-sm btn-warning">✏️ Sửa</a>
-                                    <form th:action="@{'/admin/products/delete/' + ${p.id}}" method="post"
-                                          onsubmit="return confirm('Xóa sản phẩm này?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">🗑 Xóa</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${products.content.isEmpty()}">
-                            <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">
-                                Không có sản phẩm nào
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div th:replace="~{fragments/layout :: pagination(${products}, '/admin/products')}"></div>
-            </div>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Danh sách sản phẩm</span>
+          <a th:href="@{/admin/products/create}" class="btn btn-primary btn-sm">➕ Thêm sản phẩm</a>
         </div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="filter-bar">
+            <form method="get" th:action="@{/admin/products}">
+              <input type="text" name="keyword" class="inp-search" placeholder="Tìm tên sản phẩm..." th:value="${keyword}">
+              <select name="categoryId" class="inp-select">
+                <option value="">Tất cả danh mục</option>
+                <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${c.id==categoryId}"></option>
+              </select>
+              <select name="status" class="inp-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="published" th:selected="${status=='published'}">Đang bán</option>
+                <option value="draft"     th:selected="${status=='draft'}">Nháp</option>
+                <option value="archived"  th:selected="${status=='archived'}">Lưu trữ</option>
+              </select>
+              <button type="submit" class="btn btn-secondary btn-sm">🔍 Tìm</button>
+              <a th:href="@{/admin/products}" class="btn btn-outline btn-sm">↺</a>
+            </form>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Ảnh</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Trạng thái</th><th>Nổi bật</th><th>Ngày tạo</th><th>Thao tác</th></tr></thead>
+            <tbody>
+            <tr th:each="p,s:${products.content}">
+              <td th:text="${products.number*products.size+s.index+1}">1</td>
+              <td>
+                <img th:if="${p.defaultImage!=null}" th:src="@{'/images/'+${p.defaultImage}}" class="thumb" alt="">
+                <div th:if="${p.defaultImage==null}" class="thumb-placeholder">🍵</div>
+              </td>
+              <td>
+                <div style="font-weight:500" th:text="${p.name}"></div>
+                <div style="font-size:11px;color:var(--muted)" th:text="${p.slug}"></div>
+              </td>
+              <td th:text="${p.category!=null?p.category.name:'—'}">—</td>
+              <td><span class="badge" th:classappend="'bg-'+${p.status}"
+                th:text="${p.status=='published'?'Đang bán':p.status=='draft'?'Nháp':'Lưu trữ'}"></span></td>
+              <td style="text-align:center">
+                <form th:action="@{'/admin/products/toggle-featured/'+${p.id}}" method="post" style="display:inline">
+                  <button type="submit" class="btn btn-icon" th:text="${p.isFeatured?'⭐':'☆'}"></button>
+                </form>
+              </td>
+              <td th:text="${#temporals.format(p.createdAt,'dd/MM/yyyy')}">—</td>
+              <td>
+                <div style="display:flex;gap:5px">
+                  <a th:href="@{'/admin/products/edit/'+${p.id}}" class="btn btn-sm btn-warning">✏️</a>
+                  <form th:action="@{'/admin/products/delete/'+${p.id}}" method="post" onsubmit="return confirm('Xóa sản phẩm này?')">
+                    <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${products.content.isEmpty()}">
+              <td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Không có sản phẩm nào</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:replace="~{fragments/layout :: pagination(${products},'/admin/products')}"></div>
+      </div>
     </div>
+  </div>
 </div>
 <script th:src="@{/js/admin.js}"></script>
 </body>

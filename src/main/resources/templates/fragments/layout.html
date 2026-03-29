@@ -1,104 +1,98 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<!-- ===== SIDEBAR FRAGMENT ===== -->
+<!-- ═══ SIDEBAR ═══ -->
 <nav th:fragment="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="sidebar-logo">
-            <span class="logo-icon">🧋</span>
-            <span class="logo-text">Trà Sữa Admin</span>
-        </div>
-    </div>
+  <div class="sb-logo">
+    <span class="sb-logo-icon">🧋</span>
+    <span class="sb-logo-text">Trà Sữa Admin</span>
+  </div>
+  <ul class="sb-menu">
+    <li class="sb-section">Tổng quan</li>
+    <li th:classappend="${activePage=='dashboard'}?'active':''">
+      <a th:href="@{/admin/dashboard}"><span class="sb-icon">📊</span>Dashboard</a>
+    </li>
 
-    <ul class="sidebar-menu">
-        <li class="menu-label">Tổng quan</li>
-        <li th:classappend="${activePage == 'dashboard'} ? 'active'">
-            <a th:href="@{/admin/dashboard}">
-                <i class="icon">📊</i><span>Dashboard</span>
-            </a>
-        </li>
+    <li class="sb-section">Bán hàng</li>
+    <li th:classappend="${activePage=='orders'}?'active':''">
+      <a th:href="@{/admin/orders}"><span class="sb-icon">🛒</span>Đơn hàng</a>
+    </li>
+    <li th:classappend="${activePage=='coupons'}?'active':''">
+      <a th:href="@{/admin/coupons}"><span class="sb-icon">🏷️</span>Mã giảm giá</a>
+    </li>
 
-        <li class="menu-label">Quản lý bán hàng</li>
-        <li th:classappend="${activePage == 'orders'} ? 'active'">
-            <a th:href="@{/admin/orders}">
-                <i class="icon">🛒</i><span>Đơn hàng</span>
-                <span class="badge badge-danger" id="pending-badge" style="display:none"></span>
-            </a>
-        </li>
+    <li class="sb-section">Sản phẩm</li>
+    <li th:classappend="${activePage=='products'}?'active':''">
+      <a th:href="@{/admin/products}"><span class="sb-icon">🍵</span>Sản phẩm</a>
+    </li>
+    <li th:classappend="${activePage=='categories'}?'active':''">
+      <a th:href="@{/admin/categories}"><span class="sb-icon">📂</span>Danh mục</a>
+    </li>
+    <li th:classappend="${activePage=='toppings'}?'active':''">
+      <a th:href="@{/admin/toppings}"><span class="sb-icon">🧆</span>Topping</a>
+    </li>
+    <li th:classappend="${activePage=='sizes'}?'active':''">
+      <a th:href="@{/admin/sizes}"><span class="sb-icon">📏</span>Kích cỡ</a>
+    </li>
 
-        <li class="menu-label">Quản lý sản phẩm</li>
-        <li th:classappend="${activePage == 'products'} ? 'active'">
-            <a th:href="@{/admin/products}">
-                <i class="icon">🍵</i><span>Sản phẩm</span>
-            </a>
-        </li>
-        <li th:classappend="${activePage == 'categories'} ? 'active'">
-            <a th:href="@{/admin/categories}">
-                <i class="icon">📂</i><span>Danh mục</span>
-            </a>
-        </li>
-        <li th:classappend="${activePage == 'toppings'} ? 'active'">
-            <a th:href="@{/admin/toppings}">
-                <i class="icon">🧆</i><span>Topping</span>
-            </a>
-        </li>
+    <li class="sb-section">Nội dung</li>
+    <li th:classappend="${activePage=='banners'}?'active':''">
+      <a th:href="@{/admin/banners}"><span class="sb-icon">🖼️</span>Banner</a>
+    </li>
+    <li th:classappend="${activePage=='reviews'}?'active':''">
+      <a th:href="@{/admin/reviews}">
+        <span class="sb-icon">⭐</span>Đánh giá
+        <span class="sb-badge" th:if="${pendingReviews!=null and pendingReviews>0}" th:text="${pendingReviews}"></span>
+      </a>
+    </li>
 
-        <li class="menu-label">Quản lý hệ thống</li>
-        <li th:classappend="${activePage == 'users'} ? 'active'">
-            <a th:href="@{/admin/users}">
-                <i class="icon">👥</i><span>Người dùng</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="sidebar-footer">
-        <a th:href="@{/admin/logout}" class="logout-btn">
-            <i class="icon">🚪</i><span>Đăng xuất</span>
-        </a>
-    </div>
+    <li class="sb-section">Hệ thống</li>
+    <li th:classappend="${activePage=='users'}?'active':''">
+      <a th:href="@{/admin/users}"><span class="sb-icon">👥</span>Người dùng</a>
+    </li>
+  </ul>
+  <div class="sb-footer">
+    <a th:href="@{/admin/logout}" class="sb-logout"><span class="sb-icon">🚪</span>Đăng xuất</a>
+  </div>
 </nav>
 
-<!-- ===== TOPBAR FRAGMENT ===== -->
+<!-- ═══ TOPBAR ═══ -->
 <header th:fragment="topbar" class="topbar">
-    <div class="topbar-left">
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-        <h1 class="page-title" th:text="${pageTitle}">Admin</h1>
+  <div class="topbar-l">
+    <button class="sb-toggle" onclick="toggleSidebar()">☰</button>
+    <h1 class="page-title" th:text="${pageTitle}">Admin</h1>
+  </div>
+  <div class="topbar-r">
+    <div class="admin-chip">
+      <span class="admin-avatar">👤</span>
+      <span sec:authentication="name">Admin</span>
     </div>
-    <div class="topbar-right">
-        <div class="admin-info">
-            <span class="admin-avatar">👤</span>
-            <span sec:authentication="name">Admin</span>
-        </div>
-    </div>
+  </div>
 </header>
 
-<!-- ===== ALERTS FRAGMENT ===== -->
+<!-- ═══ ALERTS ═══ -->
 <div th:fragment="alerts">
-    <div th:if="${success}" class="alert alert-success alert-dismissible">
-        <span th:text="${success}"></span>
-        <button onclick="this.parentElement.remove()">✕</button>
-    </div>
-    <div th:if="${error}" class="alert alert-danger alert-dismissible">
-        <span th:text="${error}"></span>
-        <button onclick="this.parentElement.remove()">✕</button>
-    </div>
+  <div th:if="${success}" class="alert alert-success">
+    <span th:text="${success}"></span>
+    <button class="alert-dismiss" onclick="this.parentElement.remove()">✕</button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger">
+    <span th:text="${error}"></span>
+    <button class="alert-dismiss" onclick="this.parentElement.remove()">✕</button>
+  </div>
 </div>
 
-<!-- ===== PAGINATION FRAGMENT ===== -->
-<nav th:fragment="pagination(pageData, baseUrl)" class="pagination-wrap" th:if="${pageData.totalPages > 1}">
-    <ul class="pagination">
-        <li th:classappend="${pageData.first} ? 'disabled'">
-            <a th:href="${baseUrl + '?page=' + (pageData.number - 1)}">«</a>
-        </li>
-        <li th:each="i : ${#numbers.sequence(0, pageData.totalPages - 1)}"
-            th:classappend="${i == pageData.number} ? 'active'">
-            <a th:href="${baseUrl + '?page=' + i}" th:text="${i + 1}">1</a>
-        </li>
-        <li th:classappend="${pageData.last} ? 'disabled'">
-            <a th:href="${baseUrl + '?page=' + (pageData.number + 1)}">»</a>
-        </li>
-    </ul>
+<!-- ═══ PAGINATION ═══ -->
+<nav th:fragment="pagination(pg, url)" class="pager" th:if="${pg.totalPages > 1}">
+  <a th:classappend="${pg.first}?'disabled':''"
+     th:href="${url+'?page='+(pg.number-1)}">«</a>
+  <th:block th:each="i : ${#numbers.sequence(0, pg.totalPages-1)}">
+    <a th:classappend="${i==pg.number}?'active':''"
+       th:href="${url+'?page='+i}"
+       th:text="${i+1}">1</a>
+  </th:block>
+  <a th:classappend="${pg.last}?'disabled':''"
+     th:href="${url+'?page='+(pg.number+1)}">»</a>
 </nav>
 
 </html>

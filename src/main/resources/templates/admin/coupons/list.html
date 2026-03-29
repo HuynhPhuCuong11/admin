@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Mã giảm giá - Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Danh sách mã giảm giá</span>
+          <a th:href="@{/admin/coupons/create}" class="btn btn-primary btn-sm">➕ Tạo mã mới</a>
+        </div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="filter-bar">
+            <form method="get" th:action="@{/admin/coupons}">
+              <input type="text" name="keyword" class="inp-search" placeholder="Tìm mã coupon..." th:value="${keyword}">
+              <select name="active" class="inp-select">
+                <option value="">Tất cả</option>
+                <option value="true"  th:selected="${active==true}">Đang hoạt động</option>
+                <option value="false" th:selected="${active==false}">Đã tắt</option>
+              </select>
+              <button type="submit" class="btn btn-secondary btn-sm">🔍</button>
+              <a th:href="@{/admin/coupons}" class="btn btn-outline btn-sm">↺</a>
+            </form>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+            <tr><th>Mã coupon</th><th>Loại</th><th>Giá trị</th><th>Đơn tối thiểu</th><th>Đã dùng</th><th>Hạn dùng</th><th>Trạng thái</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="c:${coupons.content}">
+              <td><span class="coupon-code" th:text="${c.code}">CODE</span></td>
+              <td th:text="${c.type=='percent'?'Phần trăm':'Cố định'}"></td>
+              <td style="font-weight:600;color:var(--danger)"
+                  th:text="${c.type=='percent'?c.value+'%':#numbers.formatDecimal(c.value,0,'COMMA',0,'POINT')+'₫'}"></td>
+              <td th:text="${#numbers.formatDecimal(c.minOrderAmount,0,'COMMA',0,'POINT')}+'₫'"></td>
+              <td>
+                <span th:text="${c.usedCount}">0</span>
+                <span th:if="${c.usageLimit!=null}" style="color:var(--muted)" th:text="'/'+${c.usageLimit}"></span>
+              </td>
+              <td>
+                <span th:if="${c.endsAt!=null}" th:text="${#temporals.format(c.endsAt,'dd/MM/yyyy')}"></span>
+                <span th:if="${c.endsAt==null}" style="color:var(--muted)">Không giới hạn</span>
+              </td>
+              <td>
+                <form th:action="@{'/admin/coupons/toggle/'+${c.id}}" method="post" style="display:inline">
+                  <button type="submit" class="badge" style="border:none;cursor:pointer"
+                    th:classappend="${c.active?'bg-active':'bg-inactive'}"
+                    th:text="${c.active?'✓ Đang dùng':'✗ Đã tắt'}"></button>
+                </form>
+              </td>
+              <td>
+                <div style="display:flex;gap:5px">
+                  <a th:href="@{'/admin/coupons/edit/'+${c.id}}" class="btn btn-sm btn-warning">✏️</a>
+                  <form th:action="@{'/admin/coupons/delete/'+${c.id}}" method="post"
+                        onsubmit="return confirm('Xóa mã coupon này?')">
+                    <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${coupons.content.isEmpty()}">
+              <td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Chưa có mã giảm giá nào</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:replace="~{fragments/layout :: pagination(${coupons},'/admin/coupons')}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title th:text="${pageTitle}+' - Admin'">Coupon</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card" style="max-width:680px">
+        <div class="card-header">
+          <span class="card-title" th:text="${pageTitle}">Coupon</span>
+          <a th:href="@{/admin/coupons}" class="btn btn-outline btn-sm">← Quay lại</a>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/admin/coupons/save}" method="post">
+            <input type="hidden" th:name="id" th:value="${coupon.id}">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Mã coupon *</label>
+                <input type="text" name="code" class="form-control" th:value="${coupon.code}"
+                       required placeholder="VD: SALE50" style="text-transform:uppercase"
+                       oninput="this.value=this.value.toUpperCase()">
+                <span class="form-hint">Mã sẽ được tự động viết HOA</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loại giảm giá *</label>
+                <select name="type" class="form-control" required>
+                  <option value="">-- Chọn loại --</option>
+                  <option value="percent" th:selected="${coupon.type=='percent'}">Phần trăm (%)</option>
+                  <option value="fixed"   th:selected="${coupon.type=='fixed'}">Số tiền cố định (₫)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Giá trị giảm *</label>
+                <input type="number" name="value" class="form-control" th:value="${coupon.value}" required min="0" step="1">
+                <span class="form-hint">Nhập % hoặc số tiền tùy loại</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Đơn hàng tối thiểu (₫)</label>
+                <input type="number" name="minOrderAmount" class="form-control"
+                       th:value="${coupon.minOrderAmount}" min="0" step="1000" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Giới hạn lượt dùng</label>
+                <input type="number" name="usageLimit" class="form-control"
+                       th:value="${coupon.usageLimit}" min="1" placeholder="Bỏ trống = không giới hạn">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Áp dụng cho danh mục</label>
+                <select name="categoryId" class="form-control">
+                  <option value="">Tất cả sản phẩm</option>
+                  <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"
+                          th:selected="${c.id==coupon.categoryId}"></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ngày bắt đầu</label>
+                <input type="datetime-local" name="startsAt" class="form-control"
+                       th:value="${coupon.startsAt!=null?#temporals.format(coupon.startsAt,'yyyy-MM-dd''T''HH:mm'):''}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ngày hết hạn</label>
+                <input type="datetime-local" name="endsAt" class="form-control"
+                       th:value="${coupon.endsAt!=null?#temporals.format(coupon.endsAt,'yyyy-MM-dd''T''HH:mm'):''}">
+              </div>
+              <div class="form-group full">
+                <div class="form-check">
+                  <input type="checkbox" name="active" id="couponActive"
+                         th:checked="${coupon.active==null or coupon.active}">
+                  <label for="couponActive" class="form-label" style="margin:0">Kích hoạt mã giảm giá</label>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:20px">
+              <button type="submit" class="btn btn-primary">💾 Lưu coupon</button>
+              <a th:href="@{/admin/coupons}" class="btn btn-secondary">↩ Quay lại</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

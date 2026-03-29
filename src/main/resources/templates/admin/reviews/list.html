@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Đánh giá - Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quản lý đánh giá</span></div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="filter-bar">
+            <form method="get" th:action="@{/admin/reviews}">
+              <input type="text" name="keyword" class="inp-search" placeholder="Tìm nội dung, sản phẩm..." th:value="${keyword}">
+              <select name="status" class="inp-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending"  th:selected="${status=='pending'}">Chờ duyệt</option>
+                <option value="approved" th:selected="${status=='approved'}">Đã duyệt</option>
+                <option value="rejected" th:selected="${status=='rejected'}">Từ chối</option>
+              </select>
+              <select name="rating" class="inp-select">
+                <option value="">Tất cả sao</option>
+                <option value="5" th:selected="${rating==5}">⭐⭐⭐⭐⭐ 5 sao</option>
+                <option value="4" th:selected="${rating==4}">⭐⭐⭐⭐ 4 sao</option>
+                <option value="3" th:selected="${rating==3}">⭐⭐⭐ 3 sao</option>
+                <option value="2" th:selected="${rating==2}">⭐⭐ 2 sao</option>
+                <option value="1" th:selected="${rating==1}">⭐ 1 sao</option>
+              </select>
+              <button type="submit" class="btn btn-secondary btn-sm">🔍</button>
+              <a th:href="@{/admin/reviews}" class="btn btn-outline btn-sm">↺</a>
+            </form>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+            <tr><th>Sản phẩm</th><th>Khách hàng</th><th>Đánh giá</th><th>Nội dung</th><th>Phản hồi</th><th>Trạng thái</th><th>Ngày</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="r:${reviews.content}">
+              <td style="font-size:12.5px;max-width:130px">
+                <span th:text="${r.product!=null?r.product.name:'—'}"></span>
+              </td>
+              <td style="font-size:12.5px">
+                <span th:text="${r.user!=null?r.user.fullName:r.user!=null?r.user.email:'—'}"></span>
+              </td>
+              <td>
+                <div class="stars">
+                  <span th:each="i:${#numbers.sequence(1,5)}"
+                        th:text="${i <= r.rating ? '★' : '☆'}"
+                        th:classappend="${i <= r.rating ? 'stars' : 'star-empty'}"></span>
+                </div>
+                <div style="font-size:11px;color:var(--muted)" th:text="${r.rating}+' / 5'"></div>
+              </td>
+              <td style="max-width:200px">
+                <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px"
+                     th:text="${r.body?:'—'}"></div>
+              </td>
+              <td>
+                <!-- Reply form inline -->
+                <div th:if="${r.adminReply!=null}" style="font-size:12px;color:var(--muted);font-style:italic;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                     th:text="'💬 '+${r.adminReply}"></div>
+                <button th:if="${r.adminReply==null}" class="btn btn-sm btn-outline"
+                        th:onclick="'showModal(''reply-'+${r.id}+''')'" type="button">💬 Phản hồi</button>
+
+                <!-- Reply Modal -->
+                <div th:id="'reply-'+${r.id}" class="modal-backdrop">
+                  <div class="modal-box">
+                    <div class="modal-title">💬 Phản hồi đánh giá</div>
+                    <form th:action="@{'/admin/reviews/'+${r.id}+'/reply'}" method="post">
+                      <div class="form-group" style="margin-bottom:16px">
+                        <label class="form-label">Nội dung phản hồi</label>
+                        <textarea name="replyText" class="form-control" rows="4" required
+                                  placeholder="Nhập phản hồi của admin..."></textarea>
+                      </div>
+                      <div style="display:flex;gap:10px">
+                        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center">Gửi phản hồi</button>
+                        <button type="button" class="btn btn-secondary" style="flex:1;justify-content:center"
+                                th:onclick="'hideModal(''reply-'+${r.id}+''')'" >Đóng</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge" th:classappend="'bg-'+${r.status}"
+                  th:text="${r.status=='pending'?'Chờ duyệt':r.status=='approved'?'Đã duyệt':'Từ chối'}"></span>
+              </td>
+              <td style="font-size:12px" th:text="${#temporals.format(r.createdAt,'dd/MM/yy')}">—</td>
+              <td>
+                <div style="display:flex;gap:4px;flex-wrap:wrap">
+                  <form th:if="${r.status!='approved'}" th:action="@{'/admin/reviews/'+${r.id}+'/approve'}" method="post">
+                    <button type="submit" class="btn btn-sm btn-success" title="Duyệt">✓</button>
+                  </form>
+                  <form th:if="${r.status!='rejected'}" th:action="@{'/admin/reviews/'+${r.id}+'/reject'}" method="post">
+                    <button type="submit" class="btn btn-sm btn-warning" title="Từ chối">✕</button>
+                  </form>
+                  <form th:action="@{'/admin/reviews/'+${r.id}+'/delete'}" method="post"
+                        onsubmit="return confirm('Xóa đánh giá này?')">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Xóa">🗑</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${reviews.content.isEmpty()}">
+              <td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Không có đánh giá nào</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:replace="~{fragments/layout :: pagination(${reviews},'/admin/reviews')}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

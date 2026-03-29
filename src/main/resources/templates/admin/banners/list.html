@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Banner - Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Danh sách Banner</span>
+          <a th:href="@{/admin/banners/create}" class="btn btn-primary btn-sm">➕ Thêm banner</a>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Ảnh</th><th>Tiêu đề</th><th>Vị trí</th><th>Thứ tự</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr></thead>
+            <tbody>
+            <tr th:each="b,s:${banners}">
+              <td th:text="${s.index+1}"></td>
+              <td>
+                <div class="img-container">
+                  <img th:if="${not #strings.isEmpty(b.imageUrl)}"
+                       th:src="${b.imageUrl.startsWith('http') or b.imageUrl.startsWith('/') ? b.imageUrl : '/images/' + b.imageUrl}"
+                       class="thumb"
+                       alt="Product Image"
+                       onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+
+                  <div th:if="${#strings.isEmpty(b.imageUrl)}" class="thumb-placeholder" style="display: flex;">
+                    <span>No Image</span>
+                  </div>
+                  <div class="thumb-placeholder" style="display: none;">
+                    <span>Error</span>
+                  </div>
+                </div>              </td>
+              <td style="font-weight:500" th:text="${b.title}"></td>
+              <td>
+                <span class="badge bg-confirmed"
+                  th:text="${b.position=='home_top'?'Trang chủ - Trên':b.position=='home_middle'?'Trang chủ - Giữa':b.position=='sidebar'?'Sidebar':b.position?:' — '}"></span>
+              </td>
+              <td th:text="${b.sortOrder}">0</td>
+              <td>
+                <form th:action="@{'/admin/banners/toggle/'+${b.id}}" method="post" style="display:inline">
+                  <button type="submit" class="badge" style="border:none;cursor:pointer"
+                    th:classappend="${b.active?'bg-active':'bg-inactive'}"
+                    th:text="${b.active?'✓ Hiển thị':'✗ Ẩn'}"></button>
+                </form>
+              </td>
+              <td th:text="${#temporals.format(b.createdAt,'dd/MM/yyyy')}">—</td>
+              <td>
+                <div style="display:flex;gap:5px">
+                  <a th:href="@{'/admin/banners/edit/'+${b.id}}" class="btn btn-sm btn-warning">✏️</a>
+                  <form th:action="@{'/admin/banners/delete/'+${b.id}}" method="post"
+                        onsubmit="return confirm('Xóa banner này?')">
+                    <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${banners.isEmpty()}">
+              <td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Chưa có banner nào</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

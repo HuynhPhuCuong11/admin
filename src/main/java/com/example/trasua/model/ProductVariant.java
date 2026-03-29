@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 @Table(name = "product_variants")
 public class ProductVariant {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "product_id", nullable = false)
@@ -41,37 +40,26 @@ public class ProductVariant {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @PreUpdate
-    public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
+    @PreUpdate public void onUpdate() { this.updatedAt = LocalDateTime.now(); }
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
-
     public Product getProduct() { return product; }
     public void setProduct(Product product) { this.product = product; }
-
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
-
     public Long getSizeId() { return sizeId; }
     public void setSizeId(Long sizeId) { this.sizeId = sizeId; }
-
     public Size getSize() { return size; }
     public void setSize(Size size) { this.size = size; }
-
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
-
     public Boolean getInStock() { return inStock; }
     public void setInStock(Boolean inStock) { this.inStock = inStock; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
+    public void setCreatedAt(LocalDateTime v) { this.createdAt = v; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setUpdatedAt(LocalDateTime v) { this.updatedAt = v; }
 }

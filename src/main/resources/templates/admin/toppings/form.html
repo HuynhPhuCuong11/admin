@@ -1,69 +1,49 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${pageTitle} + ' - Admin'">Topping</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head><meta charset="UTF-8"><title th:text="${pageTitle}+' - Admin'">Topping</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
 <body>
-<div class="admin-wrapper">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
-    <div class="main-content" id="mainContent">
-        <div th:replace="~{fragments/layout :: topbar}"></div>
-        <div class="page-body">
-            <div th:replace="~{fragments/layout :: alerts}"></div>
-
-            <div class="card" style="max-width:520px">
-                <div class="card-header">
-                    <span class="card-title" th:text="${pageTitle}">Topping</span>
-                    <a th:href="@{/admin/toppings}" class="btn btn-outline btn-sm">← Quay lại</a>
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/admin/toppings/save}" method="post">
-                        <input type="hidden" th:name="id" th:value="${topping.id}">
-
-                        <div class="form-group" style="margin-bottom:16px">
-                            <label class="form-label">Tên topping *</label>
-                            <input type="text" name="name" class="form-control"
-                                   th:value="${topping.name}" required
-                                   th:classappend="${#fields.hasErrors('name')} ? ' is-invalid'"
-                                   placeholder="VD: Trân châu đen, Kem phô mai...">
-                            <span class="invalid-feedback"
-                                  th:if="${#fields.hasErrors('name')}"
-                                  th:errors="*{name}"></span>
-                        </div>
-
-                        <div class="form-group" style="margin-bottom:16px">
-                            <label class="form-label">Giá (₫) *</label>
-                            <input type="number" name="price" class="form-control"
-                                   th:value="${topping.price}" required min="0" step="1000"
-                                   placeholder="VD: 10000">
-                        </div>
-
-                        <div class="form-group" style="margin-bottom:16px">
-                            <label class="form-label">Trạng thái</label>
-                            <select name="status" class="form-control">
-                                <option value="active"   th:selected="${topping.status == 'active' or topping.status == null}">Hoạt động</option>
-                                <option value="inactive" th:selected="${topping.status == 'inactive'}">Ngừng hoạt động</option>
-                            </select>
-                        </div>
-
-                        <div class="form-check" style="margin-bottom:24px">
-                            <input type="checkbox" name="inStock" id="inStock"
-                                   th:checked="${topping.inStock == null or topping.inStock}">
-                            <label for="inStock" class="form-label" style="margin:0">Còn hàng</label>
-                        </div>
-
-                        <div style="display:flex;gap:12px">
-                            <button type="submit" class="btn btn-primary">💾 Lưu topping</button>
-                            <a th:href="@{/admin/toppings}" class="btn btn-secondary">↩ Quay lại</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card" style="max-width:480px">
+        <div class="card-header">
+          <span class="card-title" th:text="${pageTitle}">Topping</span>
+          <a th:href="@{/admin/toppings}" class="btn btn-outline btn-sm">← Quay lại</a>
         </div>
+        <div class="card-body">
+          <form th:action="@{/admin/toppings/save}" method="post">
+            <input type="hidden" th:name="id" th:value="${topping.id}">
+            <div class="form-group" style="margin-bottom:14px">
+              <label class="form-label">Tên topping *</label>
+              <input type="text" name="name" class="form-control" th:value="${topping.name}" required placeholder="VD: Trân châu đen...">
+            </div>
+            <div class="form-group" style="margin-bottom:14px">
+              <label class="form-label">Giá (₫) *</label>
+              <input type="number" name="price" class="form-control" th:value="${topping.price}" required min="0" step="1000">
+            </div>
+            <div class="form-group" style="margin-bottom:14px">
+              <label class="form-label">Trạng thái</label>
+              <select name="status" class="form-control">
+                <option value="active"   th:selected="${topping.status=='active'   or topping.status==null}">Hoạt động</option>
+                <option value="inactive" th:selected="${topping.status=='inactive'}">Ngừng hoạt động</option>
+              </select>
+            </div>
+            <div class="form-check" style="margin-bottom:22px">
+              <input type="checkbox" name="inStock" id="inStock" th:checked="${topping.inStock==null or topping.inStock}">
+              <label for="inStock" class="form-label" style="margin:0">Còn hàng</label>
+            </div>
+            <div style="display:flex;gap:12px">
+              <button type="submit" class="btn btn-primary">💾 Lưu topping</button>
+              <a th:href="@{/admin/toppings}" class="btn btn-secondary">↩ Quay lại</a>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 <script th:src="@{/js/admin.js}"></script>
-</body>
-</html>
+</body></html>

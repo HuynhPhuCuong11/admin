@@ -8,12 +8,11 @@ import java.time.LocalDateTime;
 @Table(name = "sizes")
 public class Size {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name; // M, L, XL
+    private String name; // M | L | XL
 
     @Column(name = "price_modifier")
     private BigDecimal priceModifier = BigDecimal.ZERO;
@@ -24,21 +23,16 @@ public class Size {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @PreUpdate
-    public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
+    @PreUpdate public void onUpdate() { this.updatedAt = LocalDateTime.now(); }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
     public BigDecimal getPriceModifier() { return priceModifier; }
     public void setPriceModifier(BigDecimal priceModifier) { this.priceModifier = priceModifier; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
+    public void setCreatedAt(LocalDateTime v) { this.createdAt = v; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setUpdatedAt(LocalDateTime v) { this.updatedAt = v; }
 }

@@ -13,24 +13,34 @@ import java.time.LocalDateTime;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE " +
-           "(:keyword IS NULL OR LOWER(o.orderNo) LIKE LOWER(CONCAT('%',:keyword,'%')) " +
-           "OR LOWER(o.customerName) LIKE LOWER(CONCAT('%',:keyword,'%')) " +
-           "OR LOWER(o.customerPhone) LIKE LOWER(CONCAT('%',:keyword,'%'))) " +
+           "(:kw IS NULL OR LOWER(o.orderNo) LIKE LOWER(CONCAT('%',:kw,'%')) " +
+           "OR LOWER(o.customerName) LIKE LOWER(CONCAT('%',:kw,'%')) " +
+           "OR LOWER(o.customerPhone) LIKE LOWER(CONCAT('%',:kw,'%'))) " +
            "AND (:orderStatus IS NULL OR o.orderStatus = :orderStatus) " +
            "AND (:payStatus IS NULL OR o.payStatus = :payStatus)")
-    Page<Order> search(@Param("keyword") String keyword,
+    Page<Order> search(@Param("kw") String kw,
                        @Param("orderStatus") String orderStatus,
                        @Param("payStatus") String payStatus,
                        Pageable pageable);
 
     long countByOrderStatus(String orderStatus);
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.payStatus = 'paid'")
+    @Query("SELECT COALESCE(SUM(o.totalAmount),0) FROM Order o WHERE o.payStatus='paid'")
     BigDecimal sumRevenue();
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.payStatus = 'paid' AND o.createdAt >= :from")
+    @Query("SELECT COALESCE(SUM(o.totalAmount),0) FROM Order o WHERE o.payStatus='paid' AND o.createdAt >= :from")
     BigDecimal sumRevenueFrom(@Param("from") LocalDateTime from);
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.createdAt >= :from")
-    long countOrdersFrom(@Param("from") LocalDateTime from);
+    long countFrom(@Param("from") LocalDateTime from);
+
+    // Doanh thu 7 ngày gần nhất (theo ngày)
+    @Query("SELECT FUNCTION('DATE',o.createdAt), COALESCE(SUM(o.totalAmount),0) " +
+           "FROM Order o WHERE o.payStatus='paid' AND o.createdAt >= :from " +
+           "GROUP BY FUNCTION('DATE',o.createdAt) ORDER BY FUNCTION('DATE',o.createdAt)")
+    java.util.List<Object[]> revenueByDay(@Param("from") LocalDateTime from);
+
+    // Đơn hàng theo trạng thái (cho chart)
+    @Query("SELECT o.orderStatus, COUNT(o) FROM Order o GROUP BY o.orderStatus")
+    java.util.List<Object[]> countGroupByStatus();
 }

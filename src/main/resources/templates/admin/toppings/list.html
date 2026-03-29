@@ -1,104 +1,65 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${pageTitle} + ' - Admin'">Topping</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head><meta charset="UTF-8"><title>Topping - Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
 <body>
-<div class="admin-wrapper">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
-    <div class="main-content" id="mainContent">
-        <div th:replace="~{fragments/layout :: topbar}"></div>
-        <div class="page-body">
-            <div th:replace="~{fragments/layout :: alerts}"></div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Danh sách Topping</span>
-                    <a th:href="@{/admin/toppings/create}" class="btn btn-primary btn-sm">➕ Thêm topping</a>
-                </div>
-
-                <div class="card-body" style="padding-bottom:0">
-                    <div class="filter-bar">
-                        <form method="get" th:action="@{/admin/toppings}">
-                            <input type="text" name="keyword" class="search-input"
-                                   placeholder="Tìm tên topping..." th:value="${keyword}">
-                            <select name="status" class="filter-select">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="active"   th:selected="${status == 'active'}">Đang hoạt động</option>
-                                <option value="inactive" th:selected="${status == 'inactive'}">Ngừng hoạt động</option>
-                            </select>
-                            <button type="submit" class="btn btn-secondary btn-sm">🔍 Tìm</button>
-                            <a th:href="@{/admin/toppings}" class="btn btn-outline btn-sm">↺ Reset</a>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="table-wrap">
-                    <table class="admin-table">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Tên Topping</th>
-                            <th>Giá</th>
-                            <th>Tồn kho</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="t, stat : ${toppings.content}">
-                            <td th:text="${toppings.number * toppings.size + stat.index + 1}">1</td>
-                            <td>
-                                <div style="display:flex;align-items:center;gap:10px">
-                                    <span style="font-size:20px">🧆</span>
-                                    <span style="font-weight:500" th:text="${t.name}">Topping</span>
-                                </div>
-                            </td>
-                            <td style="font-weight:600;color:var(--success)"
-                                th:text="${#numbers.formatDecimal(t.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</td>
-                            <td>
-                                <form th:action="@{'/admin/toppings/toggle-stock/' + ${t.id}}" method="post" style="display:inline">
-                                    <button type="submit"
-                                            class="status-badge"
-                                            th:classappend="${t.inStock ? 'status-active' : 'status-cancelled'}"
-                                            th:text="${t.inStock ? '✓ Còn hàng' : '✗ Hết hàng'}"
-                                            style="border:none;cursor:pointer;font-size:11.5px"></button>
-                                </form>
-                            </td>
-                            <td>
-                                <span class="status-badge"
-                                      th:classappend="${t.status == 'active' ? 'status-active' : 'status-inactive'}"
-                                      th:text="${t.status == 'active' ? 'Hoạt động' : 'Ngừng'}">
-                                </span>
-                            </td>
-                            <td th:text="${#temporals.format(t.createdAt, 'dd/MM/yyyy')}">—</td>
-                            <td>
-                                <div style="display:flex;gap:6px">
-                                    <a th:href="@{'/admin/toppings/edit/' + ${t.id}}"
-                                       class="btn btn-sm btn-warning">✏️ Sửa</a>
-                                    <form th:action="@{'/admin/toppings/delete/' + ${t.id}}" method="post"
-                                          onsubmit="return confirm('Xóa topping này?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">🗑 Xóa</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${toppings.content.isEmpty()}">
-                            <td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">
-                                Không có topping nào
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div th:replace="~{fragments/layout :: pagination(${toppings}, '/admin/toppings')}"></div>
-            </div>
+<div class="wrapper">
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+  <div class="main" id="mainContent">
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <div class="page-body">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Danh sách Topping</span>
+          <a th:href="@{/admin/toppings/create}" class="btn btn-primary btn-sm">➕ Thêm topping</a>
         </div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="filter-bar">
+            <form method="get" th:action="@{/admin/toppings}">
+              <input type="text" name="keyword" class="inp-search" placeholder="Tìm tên topping..." th:value="${keyword}">
+              <select name="status" class="inp-select">
+                <option value="">Tất cả</option>
+                <option value="active"   th:selected="${status=='active'}">Hoạt động</option>
+                <option value="inactive" th:selected="${status=='inactive'}">Ngừng</option>
+              </select>
+              <button type="submit" class="btn btn-secondary btn-sm">🔍</button>
+              <a th:href="@{/admin/toppings}" class="btn btn-outline btn-sm">↺</a>
+            </form>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Tên Topping</th><th>Giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr></thead>
+            <tbody>
+            <tr th:each="t,s:${toppings.content}">
+              <td th:text="${toppings.number*toppings.size+s.index+1}"></td>
+              <td style="font-weight:500">🧆 <span th:text="${t.name}"></span></td>
+              <td style="font-weight:600;color:var(--success)" th:text="${#numbers.formatDecimal(t.price,0,'COMMA',0,'POINT')}+'₫'">0₫</td>
+              <td>
+                <form th:action="@{'/admin/toppings/toggle-stock/'+${t.id}}" method="post" style="display:inline">
+                  <button type="submit" class="badge" style="border:none;cursor:pointer"
+                    th:classappend="${t.inStock?'bg-active':'bg-cancelled'}"
+                    th:text="${t.inStock?'✓ Còn hàng':'✗ Hết hàng'}"></button>
+                </form>
+              </td>
+              <td><span class="badge" th:classappend="${t.status=='active'?'bg-active':'bg-inactive'}"
+                th:text="${t.status=='active'?'Hoạt động':'Ngừng'}"></span></td>
+              <td th:text="${#temporals.format(t.createdAt,'dd/MM/yyyy')}">—</td>
+              <td><div style="display:flex;gap:5px">
+                <a th:href="@{'/admin/toppings/edit/'+${t.id}}" class="btn btn-sm btn-warning">✏️</a>
+                <form th:action="@{'/admin/toppings/delete/'+${t.id}}" method="post" onsubmit="return confirm('Xóa?')">
+                  <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                </form>
+              </div></td>
+            </tr>
+            <tr th:if="${toppings.content.isEmpty()}"><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Không có topping nào</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:replace="~{fragments/layout :: pagination(${toppings},'/admin/toppings')}"></div>
+      </div>
     </div>
+  </div>
 </div>
 <script th:src="@{/js/admin.js}"></script>
-</body>
-</html>
+</body></html>
