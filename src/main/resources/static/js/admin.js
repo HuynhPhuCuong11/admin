@@ -83,6 +83,78 @@ function addVariantRow(sizeOptions) {
         </tr>`);
 }
 
+// ── COUPON VALUE MAX (percent max 100)
+function showValueError(msg) {
+    var hint = document.getElementById('couponValueHint');
+    if (hint) { hint.textContent = msg; hint.style.color = '#d32f2f'; }
+}
+
+function hideValueError() {
+    var hint = document.getElementById('couponValueHint');
+    if (hint) { hint.textContent = 'Nhập % hoặc số tiền tùy loại'; hint.style.color = ''; }
+}
+
+function updateValueMax() {
+    var type = document.getElementById('couponType');
+    var input = document.getElementById('couponValue');
+    if (!type || !input) return;
+    if (type.value === 'percent') {
+        input.max = 100;
+        input.min = 0;
+    } else {
+        input.removeAttribute('max');
+        hideValueError();
+    }
+}
+
+function validateCoupon() {
+    var type = document.getElementById('couponType');
+    var input = document.getElementById('couponValue');
+    if (type && input && type.value === 'percent') {
+        var val = parseFloat(input.value);
+        if (val > 100) {
+            input.value = 100;
+            showValueError('⚠️ Giá trị giảm không được vượt quá 100%');
+            return false;
+        }
+        if (val < 0) {
+            input.value = 0;
+            showValueError('⚠️ Giá trị giảm không được âm');
+            return false;
+        }
+    }
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var typeSelect = document.getElementById('couponType');
+    var valueInput = document.getElementById('couponValue');
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateValueMax);
+        updateValueMax();
+    }
+
+    if (valueInput) {
+        ['input', 'change', 'keyup'].forEach(function(evt) {
+            valueInput.addEventListener(evt, function() {
+                var type = document.getElementById('couponType');
+                if (type && type.value === 'percent') {
+                    if (parseFloat(this.value) > 100) {
+                        this.value = 100;
+                        showValueError('⚠️ Giá trị giảm không được vượt quá 100%');
+                    } else if (parseFloat(this.value) < 0) {
+                        this.value = 0;
+                        showValueError('⚠️ Giá trị giảm không được âm');
+                    } else {
+                        hideValueError();
+                    }
+                }
+            });
+        });
+    }
+});
+
 // ── FORMAT VND
 function fmtVND(n) { return new Intl.NumberFormat('vi-VN').format(n) + '₫'; }
 

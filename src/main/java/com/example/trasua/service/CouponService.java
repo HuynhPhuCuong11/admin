@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 public class CouponService {
     @Autowired private CouponRepository repo;
@@ -24,6 +26,14 @@ public class CouponService {
     @Transactional
     public Coupon save(Coupon c) {
         c.setCode(c.getCode().toUpperCase().trim());
+        //thêm ràng buôc về giá trị giảm và giá trị tăng
+        if ("percent".equals(c.getType()) && c.getValue() != null) {
+            if (c.getValue().compareTo(BigDecimal.ZERO) < 0)
+                throw new RuntimeException("Giá trị giảm không được âm");
+            if (c.getValue().compareTo(new BigDecimal("100")) > 0)
+                throw new RuntimeException("Giá trị giảm theo % không được vượt quá 100%");
+        }
+
         if (c.getId() == null && repo.existsByCode(c.getCode()))
             throw new RuntimeException("Mã coupon đã tồn tại");
         if (c.getId() != null && repo.existsByCodeAndIdNot(c.getCode(), c.getId()))
