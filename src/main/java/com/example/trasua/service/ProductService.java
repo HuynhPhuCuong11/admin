@@ -52,8 +52,12 @@ public class ProductService {
             slug = base + "-" + i++;
         }
         p.setSlug(slug);
-        if (imageFile != null && !imageFile.isEmpty())
+        if (imageFile != null && !imageFile.isEmpty()) {
             p.setDefaultImage(saveFile(imageFile));
+        } else if (p.getId() != null && p.getDefaultImage() == null) {
+            // Giữ lại ảnh cũ nếu không upload ảnh mới
+            productRepo.findById(p.getId()).ifPresent(existing -> p.setDefaultImage(existing.getDefaultImage()));
+        }
         return productRepo.save(p);
     }
 
