@@ -61,12 +61,12 @@ public class TrasuaAdminApplication {
                 .passwordParameter("password")
                 .permitAll()
             )
-            .logout(logout -> logout
-                .logoutUrl("/admin/logout")
-                .logoutSuccessUrl("/admin/login?logout=true")
-                .invalidateHttpSession(true)
-                .permitAll()
-            )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/admin/logout"))
+                        .logoutSuccessUrl("/admin/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .permitAll()
+                )
             .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/api/**"));
 
         return http.build();

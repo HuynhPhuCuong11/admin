@@ -125,7 +125,10 @@ tbody tr:hover{background:#fafbfc}
   </nav>
   <div class="sidebar-footer">
     <span th:text="${session.username != null ? session.username : 'Admin'}">Admin</span>
-    &nbsp;|&nbsp;<a th:href="@{/admin/logout}">Đăng xuất</a>
+    &nbsp;&nbsp;|&nbsp;<form th:action="@{/admin/logout}" method="post" style="display:inline">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit" style="background:none;border:none;color:inherit;cursor:pointer;padding:0;font:inherit;">Đăng xuất</button>
+  </form>
   </div>
 </div>
 </th:block>
