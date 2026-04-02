@@ -30,8 +30,10 @@ public class UserService implements UserDetailsService {
     }
 
     public Page<User> search(String kw, String status, String role, Pageable p) {
-        return userRepo.search(blank(kw), blank(status), blank(role), p);
+        return userRepo.search(nullIfBlank(kw), nullIfBlank(status), nullIfBlank(role), p);
     }
+
+    private String nullIfBlank(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 
     public User findById(Long id) {
         return userRepo.findById(id).orElseThrow(() -> new RuntimeException("User không tồn tại"));
@@ -58,5 +60,5 @@ public class UserService implements UserDetailsService {
     public long countCustomers() { return userRepo.countByRoles("customer"); }
     public long countActive()    { return userRepo.countByStatus("active"); }
 
-    private String blank(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
+
 }
