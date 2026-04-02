@@ -11,10 +11,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsBySlug(String slug);
     long countByStatus(String status);
 
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE " +
-           "(:kw IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))) " +
-           "AND (:categoryId IS NULL OR p.categoryId = :categoryId) " +
-           "AND (:status IS NULL OR p.status = :status)")
+    @Query(value = "SELECT p FROM Product p WHERE " +
+            "(:kw IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))) " +
+            "AND (:categoryId IS NULL OR p.categoryId = :categoryId) " +
+            "AND (:status IS NULL OR p.status = :status)",
+            countQuery = "SELECT COUNT(p) FROM Product p WHERE " +
+                    "(:kw IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))) " +
+                    "AND (:categoryId IS NULL OR p.categoryId = :categoryId) " +
+                    "AND (:status IS NULL OR p.status = :status)")
     Page<Product> search(@Param("kw") String kw, @Param("categoryId") Long categoryId,
                          @Param("status") String status, Pageable pageable);
 }

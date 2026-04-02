@@ -26,7 +26,7 @@ public class ProductService {
     @Value("${app.upload.dir}") private String uploadDir;
 
     public Page<Product> search(String kw, Long catId, String status, Pageable p) {
-        return productRepo.search(blank(kw), catId, blank(status), p);
+        return productRepo.search(nullIfBlank(kw), catId, nullIfBlank(status), p);
     }
 
     public Product findById(Long id) {
@@ -39,7 +39,7 @@ public class ProductService {
 
     @Transactional
     public Product save(Product p, MultipartFile imageFile) throws IOException {
-        if (blank(p.getSlug()) == null) p.setSlug(toSlug(p.getName()));
+        if (p.getSlug() == null || p.getSlug().isBlank());
         // Đảm bảo slug unique (trừ chính nó)
         String base = p.getSlug(), slug = base;
         int i = 1;
@@ -54,7 +54,7 @@ public class ProductService {
         p.setSlug(slug);
         if (imageFile != null && !imageFile.isEmpty()) {
             p.setDefaultImage(saveFile(imageFile));
-        } else if (p.getId() != null && p.getDefaultImage() == null) {
+        }  else if (p.getId() != null && (p.getDefaultImage() == null || p.getDefaultImage().isBlank()))  {
             // Giữ lại ảnh cũ nếu không upload ảnh mới
             productRepo.findById(p.getId()).ifPresent(existing -> p.setDefaultImage(existing.getDefaultImage()));
         }
@@ -90,7 +90,7 @@ public class ProductService {
         return name;
     }
 
-    private String blank(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
+    private String nullIfBlank(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 
     public static String toSlug(String name) {
         if (name == null) return "";

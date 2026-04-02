@@ -17,7 +17,7 @@ public class OrderService {
     @Autowired private OrderRepository repo;
 
     public Page<Order> search(String kw, String orderStatus, String payStatus, Pageable p) {
-        return repo.search(blank(kw), blank(orderStatus), blank(payStatus), p);
+        return repo.search(nullIfBlank(kw), nullIfBlank(orderStatus), nullIfBlank(payStatus), p);
     }
 
     public Order findById(Long id) {
@@ -27,10 +27,10 @@ public class OrderService {
     @Transactional
     public void updateStatus(Long id, String orderStatus, String payStatus, String note, String tracking) {
         Order o = findById(id);
-        if (!blank(orderStatus).equals("")) o.setOrderStatus(orderStatus);
-        if (!blank(payStatus).equals(""))   o.setPayStatus(payStatus);
-        if (note     != null && !note.isBlank())     o.setInternalNote(note);
-        if (tracking != null && !tracking.isBlank()) o.setTrackingNumber(tracking);
+        if (orderStatus != null && !orderStatus.isBlank()) o.setOrderStatus(orderStatus);
+        if (payStatus   != null && !payStatus.isBlank())   o.setPayStatus(payStatus);
+        if (note        != null && !note.isBlank())         o.setInternalNote(note);
+        if (tracking    != null && !tracking.isBlank())     o.setTrackingNumber(tracking);
         repo.save(o);
     }
 
@@ -53,5 +53,4 @@ public class OrderService {
     }
     public List<Object[]> countGroupByStatus() { return repo.countGroupByStatus(); }
 
-    private String blank(String s) { return (s == null || s.isBlank()) ? "" : s.trim(); }
-}
+    private String nullIfBlank(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }}

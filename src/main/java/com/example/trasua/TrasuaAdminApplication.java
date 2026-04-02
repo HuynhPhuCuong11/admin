@@ -15,6 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @SpringBootApplication
 @EnableWebSecurity
@@ -33,41 +38,55 @@ public class TrasuaAdminApplication {
     // ===== AUTH PROVIDER =====
     @Bean
     public DaoAuthenticationProvider authProvider(UserService userService,
-                                                   PasswordEncoder passwordEncoder) {
+                                                  PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider p = new DaoAuthenticationProvider();
         p.setUserDetailsService(userService);
         p.setPasswordEncoder(passwordEncoder);
         return p;
     }
 
+    // ===== CORS CONFIG =====
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
     // ===== SECURITY FILTER CHAIN =====
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                            DaoAuthenticationProvider authProvider) throws Exception {
+                                           DaoAuthenticationProvider authProvider) throws Exception {
         http
-            .authenticationProvider(authProvider)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/admin/login").permitAll()
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
-                .anyRequest().permitAll()
-            )
-            .formLogin(form -> form
-                .loginPage("/admin/login")
-                .loginProcessingUrl("/admin/login")
-                .defaultSuccessUrl("/admin/dashboard", true)
-                .failureUrl("/admin/login?error=true")
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .permitAll()
-            )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authenticationProvider(authProvider)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/admin/login").permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
+                        .anyRequest().permitAll()
+                )
+                .formLogin(form -> form
+                        .loginPage("/admin/login")
+                        .loginProcessingUrl("/admin/login")
+                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .failureUrl("/admin/login?error=true")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .permitAll()
+                )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/admin/logout"))
                         .logoutSuccessUrl("/admin/login?logout=true")
                         .invalidateHttpSession(true)
                         .permitAll()
                 )
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/api/**"));
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/api/**", "/api/**"));
 
         return http.build();
     }

@@ -14,8 +14,10 @@ public class ToppingService {
     @Autowired private ToppingRepository repo;
 
     public Page<Topping> search(String kw, String status, Pageable p) {
-        return repo.search(blank(kw), blank(status), p);
+        return repo.search(nullIfBlank(kw), nullIfBlank(status), p);
     }
+
+    private String nullIfBlank(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
     public List<Topping> findAll()    { return repo.findAll(); }
     public Topping findById(Long id)  { return repo.findById(id).orElseThrow(()->new RuntimeException("Topping không tồn tại")); }
     @Transactional public Topping save(Topping t) { return repo.save(t); }
@@ -24,5 +26,5 @@ public class ToppingService {
         Topping t = findById(id); t.setInStock(!Boolean.TRUE.equals(t.getInStock())); repo.save(t);
     }
     public long countAll() { return repo.count(); }
-    private String blank(String s) { return (s==null||s.isBlank())?null:s.trim(); }
+
 }
